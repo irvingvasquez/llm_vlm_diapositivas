@@ -1,0 +1,105 @@
+\documentclass{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{hyperref}
+
+\title{Transformers and Text Processing}
+\author{IA Collaboration}
+\date{2026}
+
+\begin{document}
+	
+	\frame{\titlepage}
+	
+
+	
+
+	
+	% --- SLIDE 6 ---
+	\begin{frame}{Text Embeddings (Token Embedding)}
+		\begin{itemize}
+			\item Allows us to manipulate the representations of words in meaningful ways[cite: 60].
+			\item We can find a word that is like another, or blend two words to find one that's in between them[cite: 61].
+			\item This concept is key to developing attention, and then transformers[cite: 62].
+		\end{itemize}
+		
+		\vspace{0.3cm}
+		% [SPACE FOR IMAGE: Animal embedding scatter plot: Bear, Sloth, Horse, etc.]
+		\vspace{0.3cm}
+	\end{frame}
+	
+	% --- SLIDE 7 & 8 ---
+	\begin{frame}{Embeddings Arithmetic}
+		Many semantic and syntactic relationships between words are (almost) linear in the word vector space[cite: 89]:
+		
+		\begin{itemize}
+			\item \textbf{Semantic:} $v(\text{king}) - v(\text{man}) + v(\text{woman}) \approx v(\text{queen})$[cite: 90, 98].
+			\item \textbf{Syntactic:} $v(\text{kings}) - v(\text{king}) + v(\text{queen}) \approx v(\text{queens})$[cite: 91].
+		\end{itemize}
+		
+		\vspace{0.3cm}
+		% [SPACE FOR IMAGE: Vectors A and B, and Man/Woman King/Queen diagrams]
+		\vspace{0.3cm}
+		
+		\footnotetext{Mikolov, Tomas, et al. "Efficient estimation of word representations in vector space." arXiv:1301.3781 (2013)[cite: 100].}
+	\end{frame}
+	
+	% --- SLIDE 9 & 10 ---
+	\begin{frame}{Embedding Words}
+		\begin{itemize}
+			\item A word embedding represents a word as a vector of hundreds of dimensions[cite: 106].
+			\item Instead of a single number, the algorithm assigns a list of numbers representing coordinates in a huge space[cite: 107].
+			\item The system processes one-dimensional tensors (lists) instead of zero-dimensional tensors[cite: 114].
+		\end{itemize}
+		
+		\footnotetext{El Boukkouri, Hicham (2018). "Arithmetic Properties of Word Embeddings"[cite: 109].}
+		\footnotetext{spaCy authors (2020). "Word Vectors and Semantic Similarity"[cite: 110].}
+	\end{frame}
+	
+	% --- SLIDE 11 & 12 ---
+	\begin{frame}{Comparing Embeddings by Similarity}
+		Once we have embeddings, it is easy to incorporate them into almost any network and compare similarity[cite: 112, 139].
+		
+		\vspace{0.3cm}
+		% [SPACE FOR IMAGE: Similarity heat map (GLoVe, Word2vec, fastText)]
+		\vspace{0.3cm}
+		
+		\begin{itemize}
+			\item Common algorithms: GLoVe (2014), Word2vec (2013), fastText (2020)[cite: 142, 144, 148].
+			\item Universal Sentence Encoder (2018) for full sentences[cite: 188].
+		\end{itemize}
+		
+		\footnotetext{Cer, Daniel, et al. "Universal Sentence Encoder." arXiv:1803.11175 (2018)[cite: 188].}
+	\end{frame}
+	
+	% --- SLIDE 13 & 14 ---
+	\begin{frame}{ELMo (Embeddings from Language Models)}
+		\textbf{Problem:} Many languages have words with different meanings (homonyms) written the same way[cite: 199].
+		\begin{itemize}
+			\item Example: "train" as a noun ("rode a train") vs. "train" as a verb ("train dogs")[cite: 203].
+			\item \textbf{ELMo (2018):} The first algorithm to produce contextualized word embeddings[cite: 206, 207].
+		\end{itemize}
+		
+		\vspace{0.2cm}
+		% [SPACE FOR IMAGE: ELMo architecture with Forward (F) and Backward (B) layers]
+		\vspace{0.2cm}
+		
+		\footnotetext{Peters, Matthew E., et al. "Deep Contextualized Word Representations." arXiv:1802.05365 (2018)[cite: 226].}
+	\end{frame}
+	
+	% --- SLIDE 15 ---
+	\begin{frame}{ELMo Visualization}
+		ELMo places each word into a space of 1,024 dimensions based on context[cite: 237].
+		
+		\vspace{0.3cm}
+		% [SPACE FOR IMAGE: Heat map comparing "train" as a verb vs. noun]
+		\vspace{0.3cm}
+		
+		\begin{itemize}
+			\item We usually place embedding algorithms like ELMo as the very first layer in a language processing network[cite: 238, 239].
+			\item It successfully distinguishes between verbal uses ("train a dog") and noun uses ("the train was empty")[cite: 235, 236].
+		\end{itemize}
+	\end{frame}
+	
+\end{document}
