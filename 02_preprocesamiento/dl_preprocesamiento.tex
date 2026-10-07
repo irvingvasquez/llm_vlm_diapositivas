@@ -32,8 +32,8 @@
 	tabsize=2
 }
 
-\title{Working with Text Data}
-\subtitle{Chapter 2: From Raw Text to Token Embeddings}
+\title{LLMs \& VLMs course}
+\subtitle{Preprocessing}
 \author{Juan Irving Vasquez}
 \date{\today}
 \institute{Instituto Politécnico Nacional (IPN)}
@@ -61,6 +61,7 @@
 	\end{itemize}
 	\end{itemize}
 \end{frame}
+	
 	
 % --- SLIDE 1 ---
 \begin{frame}{Vectorization}
@@ -149,18 +150,18 @@
 \end{frame}
 
 
-% --- SLIDE 3 & 4 ---
-\begin{frame}{Text Processing Models}
-	There are two kinds of text-processing models:
-	\begin{itemize}
-		\item \textbf{Sequence models:} care about word order (uses word-level tokenization).
-		\item \textbf{Bag-of-words models:} treat input words as a set, discarding their original order (uses N-gram tokenization).
-	\end{itemize}
-	
-	\begin{exampleblock}{N-grams Example}
-		"the cat sat on the mat." $\rightarrow$ \{"the", "the cat", "cat", "cat sat", "sat", "sat on", ...\}
-	\end{exampleblock}
-\end{frame}
+%% --- SLIDE 3 & 4 ---
+%\begin{frame}{Text Processing Models}
+%	There are two kinds of text-processing models:
+%	\begin{itemize}
+%		\item \textbf{Sequence models:} care about word order (uses word-level tokenization).
+%		\item \textbf{Bag-of-words models:} treat input words as a set, discarding their original order (uses N-gram tokenization).
+%	\end{itemize}
+%	
+%	\begin{exampleblock}{N-grams Example}
+%		"the cat sat on the mat." $\rightarrow$ \{"the", "the cat", "cat", "cat sat", "sat", "sat on", ...\}
+%	\end{exampleblock}
+%\end{frame}
 
 
 	% --- SLIDE 2 ---
@@ -180,7 +181,38 @@
 \end{frame}
 
 
+% --- Slide 3: Byte Pair Encoding (BPE) ---
+\begin{frame}{Byte Pair Encoding (BPE) Mechanism}
+	BPE is the algorithm used by GPT-2, GPT-3, and Llama.
+	\begin{enumerate}
+		\item Start with individual characters as the initial vocabulary.
+		\item Iteratively merge the most frequently occurring adjacent pair of tokens into a new single token.
+		\item Repeat until a target vocabulary size is reached.
+	\end{enumerate}
+	\textbf{Advantages:}
+	\begin{itemize}
+		\item Efficiently handles unknown words by falling back to character-level components.
+		\item Reduces the total number of tokens per sequence compared to character-level.
+	\end{itemize}
+\end{frame}
 
+
+\begin{frame}{Byte Pair Encoding (BPE) Mechanism}
+% TODO: \usepackage{graphicx} required
+\includegraphics[height=0.65\textheight]{figures/bpe}
+\end{frame}
+
+
+% --- Slide 4: Special Tokens ---
+\begin{frame}{The Role of Special Tokens}
+	To help the model understand structure, we introduce non-text tokens:
+	\begin{itemize}
+		\item \texttt{<|endoftext|>}: Marks the end of a document or sequence (crucial for GPT-style models).
+		\item \texttt{<|unk|>}: Represents words not in the vocabulary.
+		\item \texttt{<|pad|>}: Used to ensure sequences in a batch have the same length.
+	\end{itemize}
+%	\textbf{Context Window:} The maximum number of tokens an LLM can process at once (e.g., 2048, 4096, or 128k).
+\end{frame}
 
 
 % --- SLIDE 5 ---
@@ -189,21 +221,20 @@
 		\item Once text is split into tokens, you need to encode each into a numerical representation.
 		\item In practice, you build an index of all terms in the training data (the "vocabulary") and assign a unique integer to each entry.
 	\end{itemize}
+
 	
-	\begin{verbatim}
-		vocabulary = {}
-		for text in dataset:
-		  text = standardize(text)
-		  tokens = tokenize(text)
-		for token in tokens:
-		  if token not in vocabulary:
-		    vocabulary[token] = len(vocabulary)
-	\end{verbatim}
+% TODO: \usepackage{graphicx} required
+\begin{figure}
+	\centering
+	\includegraphics[height=0.4\textheight]{figures/indexing}
+	%\caption{}
+	%\label{fig:indexing}
+\end{figure}
 \end{frame}
 	
 
 	
-	% --- Slide 2: Tokenization Strategies ---
+% --- Slide 2: Tokenization Strategies ---
 %	\begin{frame}{Tokenization Strategies}
 %		How should we represent language units?
 %		\begin{itemize}
@@ -214,48 +245,138 @@
 
 
 	
-	% --- Slide 3: Byte Pair Encoding (BPE) ---
-	\begin{frame}{Byte Pair Encoding (BPE) Mechanism}
-		BPE is the algorithm used by GPT-2, GPT-3, and Llama.
-		\begin{enumerate}
-			\item Start with individual characters as the initial vocabulary.
-			\item Iteratively merge the most frequently occurring adjacent pair of tokens into a new single token.
-			\item Repeat until a target vocabulary size is reached.
-		\end{enumerate}
-		\textbf{Advantages:}
-		\begin{itemize}
-			\item Efficiently handles unknown words by falling back to character-level components.
-			\item Reduces the total number of tokens per sequence compared to character-level.
-		\end{itemize}
-	\end{frame}
+
 	
-	% --- Slide 4: Special Tokens ---
-	\begin{frame}{The Role of Special Tokens}
-		To help the model understand structure, we introduce non-text tokens:
-		\begin{itemize}
-			\item \texttt{<|endoftext|>}: Marks the end of a document or sequence (crucial for GPT-style models).
-			\item \texttt{<|unk|>}: (Less common in BPE) Represents words not in the vocabulary.
-			\item \texttt{<|pad|>}: Used to ensure sequences in a batch have the same length.
-		\end{itemize}
-		\textbf{Context Window:} The maximum number of tokens an LLM can process at once (e.g., 2048, 4096, or 128k).
-	\end{frame}
+
 	
-	% --- Slide 5: Data Sampling with Sliding Window ---
-	\begin{frame}[fragile]{Sliding Window for Training}
-		LLMs are trained to predict the \textit{next} token. We use a sliding window to create input-target pairs.
-		\vspace{0.3cm}
-		\begin{lstlisting}[language=Python]
-			# Input:  [1, 2, 3, 4, 5]
-			# Window size = 4
-			x = [1, 2, 3, 4] # Input sequence
-			y = [2, 3, 4, 5] # Target sequence (shifted by 1)
-		\end{lstlisting}
-		\begin{itemize}
-			\item For each position $i$ in the input, the model learns that the ground truth is the token at $i+1$.
-		\end{itemize}
-	\end{frame}
 	
-	% --- Slide 6: Token Embeddings ---
+
+	
+% --- Slide: Text Embeddings ---
+\begin{frame}{Text Embeddings}
+	\begin{columns}
+		\column{0.5\textwidth}
+		\begin{itemize}
+			\item Allow us to manipulate word representations in meaningful ways.
+			\item We can find a word similar to another, or blend two words to find one in between.
+			\item This concept is key to developing \textit{attention} and subsequently \textbf{Transformers}.
+		\end{itemize}
+		
+		\column{0.5\textwidth}
+		\centering
+		% Placeholder for embedding space image
+		\centering
+		\includegraphics[width=\textwidth]{figures/embedspace.png}
+	\end{columns}
+\end{frame}
+
+
+
+% --- Slide: Embeddings arithmetic ---
+\begin{frame}{Embeddings Arithmetic}
+	Embeddings allow for geometric vector operations:
+	
+	\centering
+	
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.7\linewidth]{figures/enbedarith}
+		\caption{Embedding arithmetics}
+		\label{fig:enbedarith}
+	\end{figure}
+	
+	\small (Visually represented as vector addition and subtraction in space).
+\end{frame}
+
+
+
+% --- Slide: Linear Structure ---
+\begin{frame}{Linear Structure of Embeddings}
+	Surprisingly, many semantic and syntactic relationships are (almost) linear in the word vector space.
+	
+	\begin{block}{Semantic Relationships}
+		$$v(king) - v(man) + v(woman) \approx v(queen)$$
+		\tiny
+	\end{block}
+	
+	\begin{block}{Syntactic Relationships}
+		$$v(kings) - v(king) + v(queen) \approx v(queens)$$
+		\tiny
+	\end{block}
+	
+	\vfill
+	\tiny Source: Mikolov, Tomas, et al. "Efficient estimation of word representations in vector space." arXiv (2013).
+\end{frame}
+
+% --- Slide: Embedding words ---
+\begin{frame}{Word Embeddings}
+	\begin{itemize}
+		\item A word embedding represents a word as a vector of hundreds of dimensions.
+		\item Instead of assigning a single number, the algorithm assigns a list of numbers representing its coordinates in a huge space.
+		\item The algorithm is called an \textit{embedder}, and the process is called \textit{embedding}.
+		\item Once obtained, it is easy to incorporate them into almost any network.
+		\item Instead of processing zero-dimensional tensors (single numbers), the system processes one-dimensional tensors (lists of numbers).
+	\end{itemize}
+\end{frame}
+
+
+% --- Slide: Comparing embeddings ---
+\begin{frame}{Comparing Embeddings by Similarity}
+	\begin{columns}[c] % El argumento [c] alinea el contenido verticalmente en el centro
+		
+		% Primera Columna: Imagen
+		\begin{column}{0.6\textwidth}
+			\begin{figure}
+				\centering
+				\includegraphics[width=0.8\linewidth]{figures/embed_compar} % Ajustado a \linewidth para que se adapte bien a su columna
+				\caption{Word embedding correlation}
+				\label{fig:embedcompar}
+			\end{figure}
+		\end{column}
+		
+		% Segunda Columna: Texto y Lista
+		\begin{column}{0.4\textwidth}
+			\textbf{Famous Algorithms:}
+			\begin{itemize}
+				\item GloVe (2013).
+				\item Word2vec (2014).
+				\item fastText (2020).
+			\end{itemize}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+
+% --- Slide: Embed sentences ---
+\begin{frame}{Sentence Embeddings\footnote{Cer, Daniel, et al. "Universal Sentence Encoder." arXiv (2018).}}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.45\linewidth]{figures/embedsent}
+		\caption{Correlation of embedded sentences}
+		\label{fig:embedsent}
+	\end{figure}
+\end{frame}
+
+
+% --- Slide: Problem with Word embeddings ---
+\begin{frame}{Dynamic Embeddings}
+	Many languages have words with different meanings that are written the same way (homonyms).
+	
+	\textbf{The case of the word "train":}
+	\begin{itemize}
+		\item Noun: "I rode on a \textbf{train}".
+		\item Verb: "I like to \textbf{train} dogs".
+	\end{itemize}
+	
+	\begin{alertblock}{Limitation}
+		If we assign a single static embedding to "train", we mix two entirely different ideas. We need to distinguish meanings based on context.
+	\end{alertblock}
+	
+	\textit{This leads us to the need for contextualized embeddings (like ELMo and Transformers).}
+\end{frame}
+	
+	
+% --- Slide 6: Token Embeddings ---
 	\begin{frame}{Token Embeddings}
 		\begin{itemize}
 			\item \textbf{Identity Mapping:} Integer IDs carry no semantic meaning (ID 5 is not "closer" to ID 6).
@@ -265,30 +386,77 @@
 		\end{itemize}
 	\end{frame}
 	
-	% --- Slide 7: Positional Embeddings ---
+	
+% --- Slide 7: Positional Embeddings ---
 	\begin{frame}{Adding Order: Positional Embeddings}
 		Since the Transformer architecture is permutation-invariant (it processes all tokens in parallel), it doesn't "know" the position of a token.
 		\begin{block}{The Solution}
 			Add (or concatenate) a position-dependent vector to the token embedding.
 		\end{block}
-		\begin{itemize}
-			\item \textbf{Absolute Positional Encodings:} Fixed sine/cosine functions or learnable vectors for each index $[0, 1, ..., MaxContext]$.
-			\item \textbf{Relative Positional Encodings:} Focus on the distance between tokens (used in more recent architectures like RoPE).
-		\end{itemize}
-	\end{frame}
 	
-	% --- Slide 8: Data Loaders and Tensors ---
-	\begin{frame}{Input Tensors for PyTorch}
-		For a batch of text, the input tensor usually has the shape:
-		\[ [BatchSize, ContextLength, EmbeddingDimension] \]
-		\begin{itemize}
-			\item \textbf{Batching:} Processing multiple sequences in parallel to maximize GPU utilization.
-			\item \textbf{Padding:} If sequences have different lengths, they are padded to match the longest one in the batch.
-		\end{itemize}
-	\end{frame}
+		
+% TODO: \usepackage{graphicx} required
+\begin{center}
+	\includegraphics[height=0.6\textheight]{figures/pe_absolute}
+\end{center}
+	
+%	\begin{itemize}
+%			\item \textbf{Absolute Positional Encodings:} Fixed sine/cosine functions or learnable vectors for each index $[0, 1, ..., MaxContext]$.
+%			\item \textbf{Relative Positional Encodings:} Focus on the distance between tokens (used in more recent architectures like RoPE).
+%	\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Absolute positional encoding}
+	\begin{equation}
+		X = Embedding + PE
+	\end{equation}
+	
+	For a given position $\text{pos}$ and a dimension index $i$ within the embedding vector:$$PE_{(\text{pos}, 2i)} = \sin\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)$$$$PE_{(\text{pos}, 2i+1)} = \cos\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)$$
+\end{frame}
+
+
+\begin{frame}
+	\frametitle{Absolute positional encoding}
+	\begin{figure}
+		\centering
+		\includegraphics[height=0.7\textheight]{figures/pe_example}
+		%\caption{}
+		\label{fig:peexample}
+	\end{figure}
+\end{frame}
+
+
+
+% --- Slide 5: Data Sampling with Sliding Window ---
+\begin{frame}[fragile]{Sliding Window for Training}
+	LLMs are trained to predict the \textit{next} token. We use a sliding window to create input-target pairs.
+	\vspace{0.3cm}
+	\begin{lstlisting}[language=Python]
+		# Input:  [1, 2, 3, 4, 5]
+		# Window size = 4
+		x = [1, 2, 3, 4] # Input sequence
+		y = [2, 3, 4, 5] # Target sequence (shifted by 1)
+	\end{lstlisting}
+	\begin{itemize}
+		\item For each position $i$ in the input, the model learns that the ground truth is the token at $i+1$.
+	\end{itemize}
+\end{frame}
+	
+	
+%	% --- Slide 8: Data Loaders and Tensors ---
+%	\begin{frame}{Input Tensors for PyTorch}
+%		For a batch of text, the input tensor usually has the shape:
+%		\[ [BatchSize, ContextLength, EmbeddingDimension] \]
+%		\begin{itemize}
+%			\item \textbf{Batching:} Processing multiple sequences in parallel to maximize GPU utilization.
+%			\item \textbf{Padding:} If sequences have different lengths, they are padded to match the longest one in the batch.
+%		\end{itemize}
+%	\end{frame}
 	
 	\begin{frame}[standout]
-		Next Chapter: Coding Attention Mechanisms
+		¿Questions?
 	\end{frame}
 	
 \end{document}

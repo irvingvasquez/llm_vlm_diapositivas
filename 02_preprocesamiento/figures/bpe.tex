@@ -1,0 +1,111 @@
+\documentclass[tikz,border=6pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usetikzlibrary{arrows.meta, positioning, calc}
+\renewcommand{\familydefault}{\sfdefault}
+\begin{document}
+	\begin{tikzpicture}[
+		tk/.style={rectangle, rounded corners=1.5pt, draw=black!70, fill=gray!12, minimum height=0.5cm, inner sep=1.5pt, font=\ttfamily\small, anchor=west},
+		new/.style={tk, fill=orange!40, draw=orange!80!black, thick},
+		hdr/.style={font=\sffamily\small\bfseries, anchor=west},
+		lbl/.style={font=\sffamily\scriptsize, text=gray, anchor=east}
+		]
+		\node[hdr] at (0.00,0.75) {low \textmd{\scriptsize($\times$5)}};
+		\node[hdr] at (2.33,0.75) {lower \textmd{\scriptsize($\times$2)}};
+		\node[hdr] at (5.50,0.75) {newest \textmd{\scriptsize($\times$6)}};
+		\node[hdr] at (9.09,0.75) {widest \textmd{\scriptsize($\times$3)}};
+		\node[lbl] at (-0.25,0.00) {Start};
+		\node[tk, minimum width=0.34cm] at (0.00,0.00) {l};
+		\node[tk, minimum width=0.34cm] at (0.52,0.00) {o};
+		\node[tk, minimum width=0.34cm] at (1.04,0.00) {w};
+		\node[tk, minimum width=0.34cm] at (2.33,0.00) {l};
+		\node[tk, minimum width=0.34cm] at (2.85,0.00) {o};
+		\node[tk, minimum width=0.34cm] at (3.37,0.00) {w};
+		\node[tk, minimum width=0.34cm] at (3.89,0.00) {e};
+		\node[tk, minimum width=0.34cm] at (4.41,0.00) {r};
+		\node[tk, minimum width=0.34cm] at (5.50,0.00) {n};
+		\node[tk, minimum width=0.34cm] at (6.02,0.00) {e};
+		\node[tk, minimum width=0.34cm] at (6.54,0.00) {w};
+		\node[tk, minimum width=0.34cm] at (7.06,0.00) {e};
+		\node[tk, minimum width=0.34cm] at (7.58,0.00) {s};
+		\node[tk, minimum width=0.34cm] at (8.10,0.00) {t};
+		\node[tk, minimum width=0.34cm] at (9.09,0.00) {w};
+		\node[tk, minimum width=0.34cm] at (9.61,0.00) {i};
+		\node[tk, minimum width=0.34cm] at (10.13,0.00) {d};
+		\node[tk, minimum width=0.34cm] at (10.65,0.00) {e};
+		\node[tk, minimum width=0.34cm] at (11.17,0.00) {s};
+		\node[tk, minimum width=0.34cm] at (11.69,0.00) {t};
+		\node[anchor=west, font=\sffamily\scriptsize] at (12.38,0.00) {characters only};
+		\node[lbl] at (-0.25,-0.95) {Merge 1};
+		\node[tk, minimum width=0.34cm] at (0.00,-0.95) {l};
+		\node[tk, minimum width=0.34cm] at (0.52,-0.95) {o};
+		\node[tk, minimum width=0.34cm] at (1.04,-0.95) {w};
+		\node[tk, minimum width=0.34cm] at (2.33,-0.95) {l};
+		\node[tk, minimum width=0.34cm] at (2.85,-0.95) {o};
+		\node[tk, minimum width=0.34cm] at (3.37,-0.95) {w};
+		\node[tk, minimum width=0.34cm] at (3.89,-0.95) {e};
+		\node[tk, minimum width=0.34cm] at (4.41,-0.95) {r};
+		\node[tk, minimum width=0.34cm] at (5.50,-0.95) {n};
+		\node[tk, minimum width=0.34cm] at (6.02,-0.95) {e};
+		\node[tk, minimum width=0.34cm] at (6.54,-0.95) {w};
+		\node[new, minimum width=0.76cm] at (7.06,-0.95) {es};
+		\node[tk, minimum width=0.34cm] at (8.00,-0.95) {t};
+		\node[tk, minimum width=0.34cm] at (9.09,-0.95) {w};
+		\node[tk, minimum width=0.34cm] at (9.61,-0.95) {i};
+		\node[tk, minimum width=0.34cm] at (10.13,-0.95) {d};
+		\node[new, minimum width=0.76cm] at (10.65,-0.95) {es};
+		\node[tk, minimum width=0.34cm] at (11.59,-0.95) {t};
+		\node[anchor=west, font=\sffamily\scriptsize] at (12.38,-0.95) {\texttt{e} + \texttt{s} $\rightarrow$ \colorbox{orange!40}{\texttt{es}} \quad (freq.\ 9)};
+		\node[lbl] at (-0.25,-1.90) {Merge 2};
+		\node[tk, minimum width=0.34cm] at (0.00,-1.90) {l};
+		\node[tk, minimum width=0.34cm] at (0.52,-1.90) {o};
+		\node[tk, minimum width=0.34cm] at (1.04,-1.90) {w};
+		\node[tk, minimum width=0.34cm] at (2.33,-1.90) {l};
+		\node[tk, minimum width=0.34cm] at (2.85,-1.90) {o};
+		\node[tk, minimum width=0.34cm] at (3.37,-1.90) {w};
+		\node[tk, minimum width=0.34cm] at (3.89,-1.90) {e};
+		\node[tk, minimum width=0.34cm] at (4.41,-1.90) {r};
+		\node[tk, minimum width=0.34cm] at (5.50,-1.90) {n};
+		\node[tk, minimum width=0.34cm] at (6.02,-1.90) {e};
+		\node[tk, minimum width=0.34cm] at (6.54,-1.90) {w};
+		\node[new, minimum width=1.18cm] at (7.06,-1.90) {est};
+		\node[tk, minimum width=0.34cm] at (9.09,-1.90) {w};
+		\node[tk, minimum width=0.34cm] at (9.61,-1.90) {i};
+		\node[tk, minimum width=0.34cm] at (10.13,-1.90) {d};
+		\node[new, minimum width=1.18cm] at (10.65,-1.90) {est};
+		\node[anchor=west, font=\sffamily\scriptsize] at (12.38,-1.90) {\texttt{es} + \texttt{t} $\rightarrow$ \colorbox{orange!40}{\texttt{est}} \quad (freq.\ 9)};
+		\node[lbl] at (-0.25,-2.85) {Merge 3};
+		\node[new, minimum width=0.76cm] at (0.00,-2.85) {lo};
+		\node[tk, minimum width=0.34cm] at (0.94,-2.85) {w};
+		\node[new, minimum width=0.76cm] at (2.33,-2.85) {lo};
+		\node[tk, minimum width=0.34cm] at (3.27,-2.85) {w};
+		\node[tk, minimum width=0.34cm] at (3.79,-2.85) {e};
+		\node[tk, minimum width=0.34cm] at (4.31,-2.85) {r};
+		\node[tk, minimum width=0.34cm] at (5.50,-2.85) {n};
+		\node[tk, minimum width=0.34cm] at (6.02,-2.85) {e};
+		\node[tk, minimum width=0.34cm] at (6.54,-2.85) {w};
+		\node[tk, minimum width=1.18cm] at (7.06,-2.85) {est};
+		\node[tk, minimum width=0.34cm] at (9.09,-2.85) {w};
+		\node[tk, minimum width=0.34cm] at (9.61,-2.85) {i};
+		\node[tk, minimum width=0.34cm] at (10.13,-2.85) {d};
+		\node[tk, minimum width=1.18cm] at (10.65,-2.85) {est};
+		\node[anchor=west, font=\sffamily\scriptsize] at (12.38,-2.85) {\texttt{l} + \texttt{o} $\rightarrow$ \colorbox{orange!40}{\texttt{lo}} \quad (freq.\ 7)};
+		\node[lbl] at (-0.25,-3.80) {Merge 4};
+		\node[new, minimum width=1.18cm] at (0.00,-3.80) {low};
+		\node[new, minimum width=1.18cm] at (2.33,-3.80) {low};
+		\node[tk, minimum width=0.34cm] at (3.69,-3.80) {e};
+		\node[tk, minimum width=0.34cm] at (4.21,-3.80) {r};
+		\node[tk, minimum width=0.34cm] at (5.50,-3.80) {n};
+		\node[tk, minimum width=0.34cm] at (6.02,-3.80) {e};
+		\node[tk, minimum width=0.34cm] at (6.54,-3.80) {w};
+		\node[tk, minimum width=1.18cm] at (7.06,-3.80) {est};
+		\node[tk, minimum width=0.34cm] at (9.09,-3.80) {w};
+		\node[tk, minimum width=0.34cm] at (9.61,-3.80) {i};
+		\node[tk, minimum width=0.34cm] at (10.13,-3.80) {d};
+		\node[tk, minimum width=1.18cm] at (10.65,-3.80) {est};
+		\node[anchor=west, font=\sffamily\scriptsize] at (12.38,-3.80) {\texttt{lo} + \texttt{w} $\rightarrow$ \colorbox{orange!40}{\texttt{low}} \quad (freq.\ 7)};
+		\node[hdr] at (12.38,0.75) {Most frequent pair};
+		\draw[-{Stealth}, thick, gray] (-1.55,0.25) -- (-1.55,-4.05);
+		\node[anchor=north west, font=\sffamily\scriptsize, align=left] at (-1.6,-4.35) {\textbf{Initial vocabulary:} \texttt{d e i l n o r s t w}\\ \textbf{Learned tokens:} \texttt{es, est, lo, low} \quad $\Rightarrow$ repeat until the target vocabulary size is reached};
+	\end{tikzpicture}
+\end{document}

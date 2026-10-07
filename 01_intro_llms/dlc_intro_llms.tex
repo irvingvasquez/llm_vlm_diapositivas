@@ -10,8 +10,8 @@
 % Se añade 'positioning' a las librerías
 \usetikzlibrary{shapes.geometric, calc, positioning, backgrounds}
 
-\title{Deep Learning}
-\subtitle{Understanding Large Language Models}
+\title{LLMs \& VLMs course}
+\subtitle{Introduction to Large Language Models}
 \author{Juan Irving Vasquez}
 \date{\today}
 \institute{Instituto Politécnico Nacional (IPN)}
@@ -20,6 +20,48 @@
 \begin{document}
 
 \maketitle
+
+\frame{
+	\frametitle{The A.I. revolution}
+	\begin{columns}[c] % El parámetro [c] alinea el contenido verticalmente al centro
+		
+		% --- Columna Izquierda (Texto) ---
+		\begin{column}{0.5\textwidth}
+			\begin{itemize}
+				\item ChatGPT became publicly available in November 30 2022\footnote{Gemini, Consulted May 26.}
+				\item It reached 100 million users in just two months.
+				\item 550 M in 2025.
+			\end{itemize}
+		\end{column}
+		
+		% --- Columna Derecha (Imagen) ---
+		\begin{column}{0.5\textwidth}
+			\begin{figure}
+				\centering
+				% Ajusté el ancho a \linewidth para que se adapte al tamaño de su columna
+				\includegraphics[width=\linewidth]{figures/chatgpt-user} 
+				\caption{}
+				\label{fig:chatgpt-user}
+			\end{figure}
+		\end{column}
+	\end{columns}
+}
+
+
+
+
+
+% --- Hierarchical Context ---
+\begin{frame}{AI Landscape}
+	\begin{itemize}
+		\item \textbf{Artificial Intelligence:} Systems capable of human-like intelligence tasks.
+		\item \textbf{Machine Learning:} Algorithms that learn rules automatically from data (no explicit programming).
+		\item \textbf{Deep Learning:} A subset of ML utilizing multi-layer neural networks.
+		\item \textbf{Generative AI (GenAI):} Models designed to create new content (text, images, media).
+		\item \textbf{LLMs:} Specific application of deep learning for parsing and generating human-like text.
+	\end{itemize}
+\end{frame}
+
 
 % --- Slide 1: Introduction ---
 \begin{frame}{The New Era of Natural Language Processing}
@@ -47,17 +89,6 @@
 \end{frame}
 
 
-
-% --- Slide 3: Hierarchical Context ---
-\begin{frame}{LLMs in the AI Landscape}
-    \begin{itemize}
-        \item \textbf{Artificial Intelligence:} Systems capable of human-like intelligence tasks.
-        \item \textbf{Machine Learning:} Algorithms that learn rules automatically from data (no explicit programming).
-        \item \textbf{Deep Learning:} A subset of ML utilizing multi-layer neural networks.
-        \item \textbf{Generative AI (GenAI):} Models designed to create new content (text, images, media).
-        \item \textbf{LLMs:} Specific application of deep learning for parsing and generating human-like text.
-    \end{itemize}
-\end{frame}
 
 
 \begin{frame}[fragile]{Development}
@@ -101,6 +132,7 @@
 \end{frame}
 
 
+
 % --- Slide 5: The Transformer Architecture ---
 \begin{frame}{The Transformer Foundation}
     Most modern LLMs rely on the architecture introduced in \textit{"Attention Is All You Need"} (2017).
@@ -114,6 +146,8 @@
             \end{itemize}
     \end{itemize}
 \end{frame}
+
+
 
 % --- Slide 6: Utilizing Large Datasets ---
 \begin{frame}{Scaling Laws: Data for LLMs}
@@ -136,6 +170,7 @@
     \end{itemize}
 \end{frame}
 
+
 % --- Slide 7: Emergent Behaviors ---
 \begin{frame}{Emergent Behaviors and Multitasking}
     \begin{itemize}
@@ -146,14 +181,24 @@
     \end{itemize}
 \end{frame}
 
+
+
 % --- Slide 8: Implementation Plan ---
 \begin{frame}{Building an LLM from Scratch}
-    The roadmap for the course implementation:
+    The roadmap for the implementation:
     \begin{itemize}
         \item \textbf{Stage 1: Data and Architecture:} Data preparation, tokenization (BPE), and coding the Attention mechanism.
         \item \textbf{Stage 2: Pretraining:} Implementing the training loop and evaluating performance (Educational scale).
         \item \textbf{Stage 3: Finetuning:} Taking a base model and adapting it for specific instruction-following or classification.
     \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Bibliography}
+	\begin{itemize}
+		\item Raschka, Sebastian. Build a large language model (from scratch). Simon and Schuster, 2024.
+		\item Goodfellow, Ian, et al. Deep learning. Vol. 1. No. 2. Cambridge: MIT press, 2016.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}[standout]
