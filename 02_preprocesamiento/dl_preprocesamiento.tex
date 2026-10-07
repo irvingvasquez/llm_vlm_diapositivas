@@ -204,13 +204,23 @@
 
 
 % --- Slide 4: Special Tokens ---
-\begin{frame}{The Role of Special Tokens}
+\begin{frame}{Special Tokens and size}
 	To help the model understand structure, we introduce non-text tokens:
 	\begin{itemize}
 		\item \texttt{<|endoftext|>}: Marks the end of a document or sequence (crucial for GPT-style models).
 		\item \texttt{<|unk|>}: Represents words not in the vocabulary.
 		\item \texttt{<|pad|>}: Used to ensure sequences in a batch have the same length.
 	\end{itemize}
+
+	Then the vocabulary is:
+	\begin{equation}
+		V = \{ \texttt{t}_i \}
+	\end{equation}
+	where $\texttt{t}_i$ is a token such as "low"
+	\begin{equation}
+		vocabulary\_size = |V|
+	\end{equation}
+	GPT-2 small: $|V| = 50{,}257$
 %	\textbf{Context Window:} The maximum number of tokens an LLM can process at once (e.g., 2048, 4096, or 128k).
 \end{frame}
 
@@ -218,17 +228,20 @@
 % --- SLIDE 5 ---
 \begin{frame}[fragile]{Vocabulary Indexing}
 	\begin{itemize}
-		\item Once text is split into tokens, you need to encode each into a numerical representation.
+		\item Once text is split into tokens, you need to encode each into a numerical and vector representation.
+		\begin{equation}
+			O = \texttt{OneHot}(ID(\texttt{t}))
+		\end{equation}
+		where
+		\begin{equation}
+			\texttt{OneHot}:\mathbb{Z} \rightarrow \mathbb{B}^{|V|}
+		\end{equation}
 		\item In practice, you build an index of all terms in the training data (the "vocabulary") and assign a unique integer to each entry.
 	\end{itemize}
 
-	
-% TODO: \usepackage{graphicx} required
 \begin{figure}
 	\centering
 	\includegraphics[height=0.4\textheight]{figures/indexing}
-	%\caption{}
-	%\label{fig:indexing}
 \end{figure}
 \end{frame}
 	
@@ -246,20 +259,14 @@
 
 	
 
-	
-
-	
-	
-
-	
 % --- Slide: Text Embeddings ---
 \begin{frame}{Text Embeddings}
 	\begin{columns}
 		\column{0.5\textwidth}
+
 		\begin{itemize}
 			\item Allow us to manipulate word representations in meaningful ways.
 			\item We can find a word similar to another, or blend two words to find one in between.
-			\item This concept is key to developing \textit{attention} and subsequently \textbf{Transformers}.
 		\end{itemize}
 		
 		\column{0.5\textwidth}
@@ -312,9 +319,15 @@
 \begin{frame}{Word Embeddings}
 	\begin{itemize}
 		\item A word embedding represents a word as a vector of hundreds of dimensions.
+		\begin{equation}
+			\texttt{Embedding}(O):\mathbb{B}^{|V|} \rightarrow \mathbb{R}^{d_{model}}
+		\end{equation}
+		\begin{equation}
+			\textbf{e} = \texttt{Embedding}(O)
+		\end{equation}
+	\item In Vaswani et al $d_{\text{model}} = 512$, in GPT2 $d_{\text{model}} = 768$
 		\item Instead of assigning a single number, the algorithm assigns a list of numbers representing its coordinates in a huge space.
 		\item The algorithm is called an \textit{embedder}, and the process is called \textit{embedding}.
-		\item Once obtained, it is easy to incorporate them into almost any network.
 		\item Instead of processing zero-dimensional tensors (single numbers), the system processes one-dimensional tensors (lists of numbers).
 	\end{itemize}
 \end{frame}
@@ -351,7 +364,7 @@
 \begin{frame}{Sentence Embeddings\footnote{Cer, Daniel, et al. "Universal Sentence Encoder." arXiv (2018).}}
 	\begin{figure}
 		\centering
-		\includegraphics[width=0.45\linewidth]{figures/embedsent}
+		\includegraphics[width=0.5\linewidth]{figures/embedsent}
 		\caption{Correlation of embedded sentences}
 		\label{fig:embedsent}
 	\end{figure}
@@ -377,56 +390,123 @@
 	
 	
 % --- Slide 6: Token Embeddings ---
-	\begin{frame}{Token Embeddings}
-		\begin{itemize}
-			\item \textbf{Identity Mapping:} Integer IDs carry no semantic meaning (ID 5 is not "closer" to ID 6).
-			\item \textbf{Embedding Layer:} A lookup table of size $(VocabSize \times EmbeddingDimension)$.
-			\item \textbf{Projection:} Each token ID is mapped to a vector in $\mathbb{R}^d$ (e.g., $d=768$ for GPT-2).
-			\item These vectors are \textbf{learnable parameters} updated during backpropagation.
-		\end{itemize}
-	\end{frame}
+%	\begin{frame}{Token Embeddings}
+%		\begin{itemize}
+%			\item \textbf{Identity Mapping:} Integer IDs carry no semantic meaning (ID 5 is not "closer" to ID 6).
+%			\item \textbf{Embedding Layer:} A lookup table of size $(VocabSize \times EmbeddingDimension)$.
+%			\item \textbf{Projection:} Each token ID is mapped to a vector in $\mathbb{R}^d$ (e.g., $d=768$ for GPT-2).
+%			\item These vectors are \textbf{learnable parameters} updated during backpropagation.
+%		\end{itemize}
+%	\end{frame}
+
+
+% --- GPT-2 embedding: forward pass ---
+\begin{frame}{GPT-2 Embeddings: Forward Pass}
+	\small
+	
+	\begin{block}{Learnable matrices}
+		\[
+		W_E \in \mathbb{R}^{|V| \times d_{\text{model}}} \quad (\texttt{wte})
+		\] 
+	\end{block}
+	
+	\textbf{Embedding of the token t at position $ID$} (row lookup):
+	\begin{equation}
+		\texttt{Embedding}_{GPT2}(O) = O^{\top} W_E 
+	\end{equation}
+	 $$W_E[ID(\texttt{t})]$$
+	\textbf{Matrix form} for the whole sequence:
+	\begin{equation}
+		\underbrace{\mathbf{O}\,W_E}_{n \times d_{\text{model}}} 
+		\qquad \mathbf{O} \in \{0,1\}^{n \times |V|} \text{ (one-hot rows)}
+	\end{equation}
+	where $n$ is the input lenght
+\end{frame}
+
+
 	
 	
 % --- Slide 7: Positional Embeddings ---
-	\begin{frame}{Adding Order: Positional Embeddings}
+	\begin{frame}{Adding Order: Positional Ecoding}
 		Since the Transformer architecture is permutation-invariant (it processes all tokens in parallel), it doesn't "know" the position of a token.
 		\begin{block}{The Solution}
 			Add (or concatenate) a position-dependent vector to the token embedding.
 		\end{block}
-	
-		
-% TODO: \usepackage{graphicx} required
-\begin{center}
-	\includegraphics[height=0.6\textheight]{figures/pe_absolute}
-\end{center}
-	
-%	\begin{itemize}
-%			\item \textbf{Absolute Positional Encodings:} Fixed sine/cosine functions or learnable vectors for each index $[0, 1, ..., MaxContext]$.
-%			\item \textbf{Relative Positional Encodings:} Focus on the distance between tokens (used in more recent architectures like RoPE).
-%	\end{itemize}
+	\begin{itemize}
+			\item \textbf{Absolute Positional Encodings:} Fixed sine/cosine functions or learnable vectors for each index $[0, 1, ..., MaxContext]$.
+			\item \textbf{Relative Positional Encodings:} Focus on the distance between tokens (used in more recent architectures like RoPE).
+	\end{itemize}
 \end{frame}
 
 
 \begin{frame}
 	\frametitle{Absolute positional encoding}
 	\begin{equation}
-		X = Embedding + PE
+		X = \texttt{Embedding}(\textbf{e}) + PE(d_{\text{model}})
 	\end{equation}
-	
-	For a given position $\text{pos}$ and a dimension index $i$ within the embedding vector:$$PE_{(\text{pos}, 2i)} = \sin\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)$$$$PE_{(\text{pos}, 2i+1)} = \cos\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)$$
+\begin{center}
+	\includegraphics[height=0.6\textheight]{figures/pe_absolute}
+\end{center}
 \end{frame}
+
 
 
 \begin{frame}
 	\frametitle{Absolute positional encoding}
-	\begin{figure}
-		\centering
-		\includegraphics[height=0.7\textheight]{figures/pe_example}
-		%\caption{}
-		\label{fig:peexample}
-	\end{figure}
+	\begin{equation*}
+		X = Embedding(\textbf{Token}) + PE(d_{\text{model}})
+	\end{equation*}
+	
+	\begin{columns}[c]
+		% --- Columna izquierda: fórmulas ---
+		\begin{column}{0.42\textwidth}
+			\small
+			For a given position $\text{pos}$ and a dimension index $i$ within the embedding vector:
+			\begin{equation}
+				PE_{(\text{pos}, 2i)} = \sin\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)
+			\end{equation}
+			\begin{equation}
+				PE_{(\text{pos}, 2i+1)} = \cos\left(\frac{\text{pos}}{10000^{\frac{2i}{d_{\text{model}}}}}\right)
+			\end{equation}
+		\end{column}
+		
+		% --- Columna derecha: figura ---
+		\begin{column}{0.58\textwidth}
+			\centering
+			\includegraphics[width=0.7\linewidth]{figures/pe_example}
+		\end{column}
+	\end{columns}
 \end{frame}
 
+
+
+\begin{frame}{GPT-2 Positional encoding}
+	
+	\begin{block}{Learnable matrices}
+		\[
+		W_E \in \mathbb{R}^{|V| \times d_{\text{model}}} \quad (\texttt{wte}), \qquad
+		W_P \in \mathbb{R}^{n_{\text{ctx}} \times d_{\text{model}}} \quad (\texttt{wpe})
+		\]
+	\end{block}
+	
+	\textbf{Embedding of the token at position $pos$}:
+	\begin{equation}
+		x_pos = W_E[pos] + W_P[pos] = O^{\top} W_E + O^{\top} W_P
+	\end{equation}
+	
+	\textbf{Matrix form} for the whole sequence:
+	\begin{equation}
+		X = \underbrace{\mathbf{O}\,W_E}_{n \times d_{\text{model}}} + \underbrace{W_P[0\!:\!n]}_{n \times d_{\text{model}}},
+		\qquad \mathbf{O} \in \{0,1\}^{n \times |V|} \text{ (one-hot rows)}
+	\end{equation}
+\end{frame}
+
+
+\begin{frame}{GPT-2 Preprocessing}
+\begin{center}
+	\includegraphics[height=0.95\textheight]{figures/gpt2_prep}
+\end{center}
+\end{frame}
 
 
 % --- Slide 5: Data Sampling with Sliding Window ---
