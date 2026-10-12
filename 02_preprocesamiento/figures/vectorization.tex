@@ -1,0 +1,68 @@
+\documentclass[tikz,border=10pt]{standalone}
+
+\usetikzlibrary{positioning, arrows.meta}
+
+\begin{document}
+	
+	\begin{tikzpicture}[
+		% Definición de estilos
+		node distance=0.7cm,
+		box/.style={
+			rectangle, 
+			draw=black, 
+			fill=gray!15, 
+			minimum width=3cm, 
+			minimum height=0.5cm, 
+			align=center,
+			font=\sffamily
+		},
+		label_text/.style={
+			font=\sffamily\bfseries,
+			anchor=east,
+			xshift=-0.5cm
+		},
+		arrow_label/.style={
+			font=\sffamily\scriptsize,
+			anchor=west,
+			xshift=0.1cm
+		},
+		arrow/.style={
+			-{Stealth[scale=1.2]},
+			thick
+		}
+		]
+		
+		% Nodos (Cajas)
+		\node [box] (text) {The cat sat on the mat.};
+		\node [box, below=of text] (standardized) {the cat sat on the mat};
+		\node [box, below=of standardized] (tokens) {"the", "cat", "sat", "on", "the", "mat"};
+		\node [box, below=of tokens] (indices) {3, 26, 65, 9, 3, 133};
+		
+		% Nodo especial para los vectores (One-hot encoding)
+		\node [box, below=of indices, minimum height=0.3cm, yshift=-0.2cm] (vectors) {
+			\begin{tikzpicture}[scale=0.2]
+				\foreach \x/\vals in {0/{0,0,0,1,0,0}, 1/{0,0,0,0,1,0}, 2/{0,1,0,0,0,0}, 3/{1,0,0,0,0,0}, 4/{0,0,0,0,1,0}, 5/{1,0,0,0,0,1}} {
+					\draw[draw=black] (\x*1.2, 1.5) rectangle ++(0.8, 5);
+					\foreach \y [count=\i] in \vals {
+						\node at (\x*1.2 + 0.4, 7.4 - \i*0.7) {\tiny \y};
+					}
+				}
+			\end{tikzpicture}
+		};
+		
+		% Etiquetas a la izquierda
+		\node [label_text] at (text.west) {Text};
+		\node [label_text] at (standardized.west) {Standardized text};
+		\node [label_text] at (tokens.west) {Tokens};
+		\node [label_text] at (indices.west) {Token indices};
+		\node [label_text, align=right] at (vectors.west) {Vector\\encoding\\of indices};
+		
+		% Flechas y etiquetas a la derecha
+		\draw [arrow] (text) -- (standardized) node[midway, arrow_label] {Standardization};
+		\draw [arrow] (standardized) -- (tokens) node[midway, arrow_label] {Tokenization};
+		\draw [arrow] (tokens) -- (indices) node[midway, arrow_label] {Indexing};
+		\draw [arrow] (indices) -- (vectors) node[midway, arrow_label] {One-hot encoding};
+		
+	\end{tikzpicture}
+	
+\end{document}

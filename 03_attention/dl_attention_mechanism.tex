@@ -7,6 +7,7 @@
 \usepackage{amsfonts}
 \usepackage{booktabs}
 \usepackage{listings}
+\usepackage{subcaption}
 
 % Configuración para bloques de código Python
 \lstset{
@@ -20,8 +21,8 @@
 	showstringspaces=false
 }
 
-\title{Attention Mechanisms}
-\subtitle{The Core of the Transformer Architecture}
+\title{LLMs \& VLMs course}
+\subtitle{The attention mechanism}
 \author{Juan Irving Vasquez}
 \date{\today}
 \institute{Instituto Politécnico Nacional (IPN)}
@@ -31,29 +32,38 @@
 	
 	\maketitle
 	
+	\frame{
+		\frametitle{Contents}
+		\tableofcontents
+	}
+	
+	\AtBeginSection[] { \begin{frame} \frametitle{Roadmap} \tableofcontents[currentsection] \end{frame} }
+	
+	\section{Motivation}
+	
 	% --- Diapositiva 1: Why Attention? ---
 	\begin{frame}{The Motivation for Attention}
-		\begin{itemize}
-			\item The task
-		\end{itemize}
-		\includegraphics[height=0.8\textheight]{long_sequence}
+		%\begin{itemize}
+		%	\item The task
+		%\end{itemize}
+		\centering
+		\includegraphics[height=0.9\textheight]{figures/secuencia}
 	\end{frame}
 
 
-	% --- Diapositiva 1: Why Attention? ---
 	\begin{frame}{The Motivation for Attention}
 		\begin{itemize}
 			\item \textbf{Problem with RNNs:} Difficulty in capturing long-range 		\end{itemize}
-		\includegraphics[height=0.8\textheight]{rnn}
+		\includegraphics[height=0.8\textheight]{figures/rnn_problem}
 	\end{frame}
+
 	
-	% --- Diapositiva 1: Why Attention? ---
 	\begin{frame}{The Motivation for Attention}
 		\begin{itemize}
 			\item \textbf{The Attention Concept:} Allows the model to focus on different parts of the input sequence regardless of their distance.
 			\item \textbf{Key Insight:} Instead of a fixed-size hidden state, we compute a weighted sum of all input tokens' representations.
 		\end{itemize}
-	\includegraphics[height=0.6\textheight]{focusing}
+	\includegraphics[height=0.65\textheight]{figures/attention_motivation}
 	\end{frame}
 
 
@@ -65,15 +75,131 @@
 	}
 
 
+\begin{frame}
+	\frametitle{8 Google Employees Invented Modern AI\footnote{\scriptsize Steven Levy, "8 Google Employees Invented Modern AI. Here’s the Inside Story," Wired, 20 de marzo de 2024}}
+	\begin{figure}
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_01}
+			\caption{\scriptsize J. Uszkoreit}
+			\label{fig:first}
+		\end{subfigure}
+		%\hfill
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_02}
+			\caption{\scriptsize Niki Parmar}
+			\label{fig:Niki}
+		\end{subfigure}
+		%\hfill
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_03}
+			\caption{\scriptsize I. Polosukhin.}
+			\label{fig:Polosukhin}
+		\end{subfigure}
+		%\hfill
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_04}
+			\caption{\scriptsize Llion Jones.}
+			\label{fig:jones}
+		\end{subfigure}
+		
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_05}
+			\caption{\scriptsize L. Kaizer.}
+			\label{fig:lukasz}
+		\end{subfigure}
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_06}
+			\caption{\scriptsize N. Zhazeer.}
+			\label{fig:noam}
+		\end{subfigure}
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_07}
+			\caption{\scriptsize A.N. Gomez.}
+			\label{fig:gomez}
+		\end{subfigure}
+		\begin{subfigure}{0.16\textwidth}
+			\includegraphics[width=\textwidth]{./figures/Wired_MA_08}
+			\caption{\scriptsize A. Vaswani.}
+			\label{fig:vaswani}
+		\end{subfigure}
+	\end{figure}
+\end{frame}
+
+
 	\begin{frame}
 		\frametitle{The transformer architecture}
 		\begin{figure}
 			\centering
-			\includegraphics[height=0.8\textheight]{transformer}
-			%\caption{}
-			%\label{fig:transformer}
+			\includegraphics[height=0.9\textheight]{transformer}
 		\end{figure}
 	\end{frame}
+
+
+
+\section{The attention mechanism}
+
+
+\begin{frame}
+	\frametitle{Initial explanation}
+	\framesubtitle{Attention cues}
+	\begin{figure}
+		\centering
+		\includegraphics[width=0.3\linewidth]{figures/pollo}
+		\includegraphics[width=0.3\linewidth]{figures/hamaca}
+		\includegraphics[width=0.3\linewidth]{figures/tel}
+		\caption{Volitional vs non-volitional cues}
+		\label{fig:pollo}
+	\end{figure}
+\end{frame}
+
+
+% Slide 1: Concept and Intuition
+\begin{frame}{From Input to Attention Spaces}
+	The input matrix $X$ (comprising token embeddings and positional encodings) is linearly projected into three separate vector spaces:
+	
+	\vspace{0.4cm}
+	\begin{columns}[T]
+		\begin{column}{0.31\textwidth}
+			\begin{block}{\centering \rule{0pt}{2ex} Query ($Q$)}
+				\small
+				\textbf{What am I looking for?} \\
+				Represents the current token's focus or "question" directed at the rest of the sequence.
+			\end{block}
+		\end{column}
+		
+		\begin{column}{0.31\textwidth}
+			\begin{block}{\centering \rule{0pt}{2ex} Key ($K$)}
+				\small
+				\textbf{What do I offer?} \\
+				Represents the relevance label of a token. It is used to match against incoming Queries.
+			\end{block}
+		\end{column}
+		
+		\begin{column}{0.31\textwidth}
+			\begin{block}{\centering \rule{0pt}{2ex} Value ($V$)}
+				\small
+				\textbf{What do I contain?} \\
+				Holds the actual semantic content that will be extracted if a strong match occurs.
+			\end{block}
+		\end{column}
+	\end{columns}
+\end{frame}
+
+% Slide 2: Mathematical Formulation
+\begin{frame}{Mathematical Formulation}
+	Each matrix is generated by multiplying the input matrix $X$ by its respective learnable weight matrix:
+	
+	\begin{equation}
+		Q = X \cdot W^Q
+	\end{equation}
+	\begin{equation}
+		K = X \cdot W^K
+	\end{equation}
+	\begin{equation}
+		V = X \cdot W^V
+	\end{equation}	
+	The projection weight matrices $W^Q, W^K,$ and $W^V$ are randomly initialized and optimized end-to-end via backpropagation during training.
+\end{frame}
 
 
 	\begin{frame}
@@ -101,39 +227,12 @@
 			\item \textbf{Softmax:} Normalizes scores into probabilities (weights summing to 1).
 		\end{itemize}
 	\end{frame}
-	
-	% --- Diapositiva 3: Self-Attention vs. Cross-Attention ---
-	\begin{frame}{Self-Attention vs. Cross-Attention}
-		\begin{columns}
-			\column{0.5\textwidth}
-			\textbf{Self-Attention:}
-			\begin{itemize}
-				\item $Q, K, V$ all originate from the same input sequence.
-				\item Used in Encoders and Decoders to relate different positions of the same sequence.
-			\end{itemize}
-			
-			\column{0.5\textwidth}
-			\textbf{Cross-Attention:}
-			\begin{itemize}
-				\item $Q$ comes from one sequence (e.g., decoder), while $K$ and $V$ come from another (e.g., encoder output).
-				\item Essential for tasks like Machine Translation.
-			\end{itemize}
-		\end{columns}
-	\end{frame}
-	
-	
-	% --- Diapositiva 4: Causal Attention (Masking) ---
-	\begin{frame}[fragile]{Causal Attention: Masking the Future}
-		In GPT-like models (Decoder-only), a token should only attend to previous tokens.
-		\begin{itemize}
-			\item \textbf{Implementation:} Apply a triangular mask (lower triangular matrix) to the scores before the softmax.
-			\item \textbf{Value:} Future positions are set to $-\infty$, resulting in 0 probability after softmax.
-		\end{itemize}
-	\end{frame}
 
-	
-	% --- Diapositiva 5: Multi-Head Attention (MHA) ---
-	\begin{frame}{Multi-Head Attention (MHA)}
+
+
+\begin{frame}{Multi-Head Attention (MHA)}
+	\begin{columns}[T]
+		\column{0.48\textwidth}
 		Why use multiple heads?
 		\begin{itemize}
 			\item Allows the model to jointly attend to information from different representation subspaces at different positions.
@@ -144,8 +243,60 @@
 				\item Concatenate the results and apply a linear projection.
 			\end{enumerate}
 		\end{itemize}
-		[Image of multi-head attention architecture]
+		\column{0.48\textwidth}
+		\begin{figure}
+			\centering
+			\includegraphics[height=0.65\textheight]{"multihead attention"}
+			\caption{Multi-Head Attention consists of several attention layers running in parallel}
+			\label{fig:multihead-attention}
+		\end{figure}
+	\end{columns}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Multi-head attention}
+	\begin{equation}
+		\text{MultiHeadAttention}(Q, K, V) = \text{Concat}(\text{head}_1, \text{head}_2, \ldots, \text{head}_h) W^O
+	\end{equation} where
+	
+	\begin{equation}
+		\quad \text{head}_i = \text{Attention}(QW_{i}^Q, KW_{i}^K, VW_{i}^V)
+	\end{equation}
+\end{frame}
+
+	
+	% --- Diapositiva 3: Self-Attention vs. Cross-Attention ---
+	\begin{frame}{Self-Attention vs. Cross-Attention}
+		\begin{columns}
+			\column{0.5\textwidth}
+			\textbf{Self-Attention:}
+			\begin{itemize}
+				\item $Q, K, V$ all originate from the same input sequence.
+				\item Used in Encoders and Decoders to relate different positions of the same sequence.
+			\end{itemize}
+			\includegraphics[width=0.45\linewidth]{figures/self_attention}
+			\column{0.5\textwidth}
+			\textbf{Cross-Attention:}
+			\begin{itemize}
+				\item $Q$ comes from one sequence (e.g., decoder), while $K$ and $V$ come from another (e.g., encoder output).
+				\item Essential for tasks like Machine Translation.
+			\end{itemize}
+			\includegraphics[width=0.9\linewidth]{figures/cross_attention}
+		\end{columns}
 	\end{frame}
+	
+	
+	\begin{frame}[fragile]{Causal Attention: Masking the Future}
+		In GPT-like models (Decoder-only), a token should only attend to previous tokens.
+%		\begin{itemize}
+%			\item Apply a triangular mask (lower triangular matrix) to the scores before the softmax. \textbf{Value:} Future positions are set to $-\infty$, resulting in 0 probability after softmax.
+%		\end{itemize}
+		\centering
+		\includegraphics[height=0.85\textheight]{figures/mask_attention}
+	\end{frame}
+
+	
+
 	
 	% --- Diapositiva 6: Computational Complexity ---
 	\begin{frame}{Computational Efficiency and Complexity}
@@ -160,22 +311,23 @@
 		\end{itemize}
 	\end{frame}
 	
-	% --- Diapositiva 7: Implementation Overview ---
-	\begin{frame}[fragile]{From Math to Code: PyTorch Structure}
-		\begin{lstlisting}
-			class MultiHeadAttention(nn.Module):
-			def __init__(self, d_in, d_out, context_len, dropout, num_heads):
-			super().__init__()
-			self.W_query = nn.Linear(d_in, d_out, bias=False)
-			self.W_key = nn.Linear(d_in, d_out, bias=False)
-			self.W_value = nn.Linear(d_in, d_out, bias=False)
-			# ... rest of the logic
-		\end{lstlisting}
-		\textbf{Crucial:} Biases are often omitted in $Q, K, V$ linear layers in modern implementations to simplify the geometry of the projection.
-	\end{frame}
+%	% --- Diapositiva 7: Implementation Overview ---
+%	\begin{frame}[fragile]{From Math to Code: PyTorch Structure}
+%		\begin{lstlisting}
+%			class MultiHeadAttention(nn.Module):
+%			def __init__(self, d_in, d_out, context_len, dropout, num_heads):
+%			super().__init__()
+%			self.W_query = nn.Linear(d_in, d_out, bias=False)
+%			self.W_key = nn.Linear(d_in, d_out, bias=False)
+%			self.W_value = nn.Linear(d_in, d_out, bias=False)
+%			# ... rest of the logic
+%		\end{lstlisting}
+%		\textbf{Crucial:} Biases are often omitted in $Q, K, V$ linear layers in modern implementations to simplify the geometry of the projection.
+%	\end{frame}
+	
 	
 	\begin{frame}[standout]
-		Next Chapter: Implementing a GPT Model from Scratch
+		Practice: Implementing the attenttion mechanism
 	\end{frame}
 	
 \end{document}
