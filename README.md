@@ -2,7 +2,7 @@
 
 Diapositivas del curso **LLMs & VLMs** (modelos de lenguaje y de visión-lenguaje), impartido en el Instituto Politécnico Nacional (ESCOM / CIDETEC).
 
-El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings y el mecanismo de atención que sostiene la arquitectura Transformer.
+El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención y la implementación de un GPT.
 
 | | |
 |---|---|
@@ -19,7 +19,7 @@ llm_vlm_diapositivas/
 ├── 01_intro_llms/          # Introducción a los LLM
 ├── 02_preprocesamiento/    # Tokenización, embeddings y codificación posicional
 ├── 03_attention/           # Mecanismos de atención
-├── 04_LLM/                 # Módulo en preparación
+├── 04_LLM/                 # Implementación de un modelo GPT
 └── README.md
 ```
 
@@ -34,6 +34,7 @@ Cada fila enlaza al PDF de la presentación.
 | 01 | Introducción a los modelos de lenguaje | [`01_intro_llms`](01_intro_llms) | [PDF](01_intro_llms/dlc_intro_llms.pdf) |
 | 02 | Preprocesamiento: del texto a los embeddings | [`02_preprocesamiento`](02_preprocesamiento) | [PDF](02_preprocesamiento/dl_preprocesamiento.pdf) |
 | 03 | Mecanismos de atención | [`03_attention`](03_attention) | [PDF](03_attention/dl_attention_mechanism.pdf) |
+| 04 | Implementación de un modelo GPT | [`04_LLM`](04_LLM) | [PDF](04_LLM/dl_llm.pdf) |
 
 ### Qué cubre cada lección
 
@@ -41,7 +42,9 @@ Cada fila enlaza al PDF de la presentación.
 
 **02. Preprocesamiento.** Tokenización y Byte Pair Encoding, tokens especiales y tamaño del vocabulario, indexado, embeddings de palabras y de oraciones, el pase hacia adelante de los embeddings de GPT-2, codificación posicional absoluta y la de GPT-2, y la ventana deslizante para predecir el siguiente token.
 
-**03. Atención.** Motivación frente a las redes recurrentes, atención por producto punto escalado, autoatención y atención cruzada, enmascaramiento causal, atención multicabeza y el paso de las fórmulas a la estructura en PyTorch.
+**03. Atención.** Motivación frente a las redes recurrentes, atención por producto punto escalado, autoatención y atención cruzada, enmascaramiento causal y atención multicabeza.
+
+**04. Implementación de un GPT.** Del bloque de atención al modelo completo: GPT-2 *small* (124M), normalización por capas, red feed-forward con GELU, conexiones residuales, el bloque Transformer, `GPTModel` y la generación de texto token por token.
 
 ---
 
