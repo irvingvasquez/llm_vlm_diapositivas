@@ -2,7 +2,7 @@
 
 Diapositivas del curso **LLMs & VLMs** (modelos de lenguaje y de visión-lenguaje), impartido en el Instituto Politécnico Nacional (ESCOM / CIDETEC).
 
-El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención y la implementación de un GPT.
+El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención, la implementación de un GPT y su preentrenamiento.
 
 | | |
 |---|---|
@@ -20,6 +20,7 @@ llm_vlm_diapositivas/
 ├── 02_preprocesamiento/    # Tokenización, embeddings y codificación posicional
 ├── 03_attention/           # Mecanismos de atención
 ├── 04_LLM/                 # Implementación de un modelo GPT
+├── 05_Pretraining/         # Preentrenamiento con datos no etiquetados
 └── README.md
 ```
 
@@ -35,6 +36,7 @@ Cada fila enlaza al PDF de la presentación.
 | 02 | Preprocesamiento: del texto a los embeddings | [`02_preprocesamiento`](02_preprocesamiento) | [PDF](02_preprocesamiento/dl_preprocesamiento.pdf) |
 | 03 | Mecanismos de atención | [`03_attention`](03_attention) | [PDF](03_attention/dl_attention_mechanism.pdf) |
 | 04 | Implementación de un modelo GPT | [`04_LLM`](04_LLM) | [PDF](04_LLM/dl_llm.pdf) |
+| 05 | Preentrenamiento con datos no etiquetados | [`05_Pretraining`](05_Pretraining) | [PDF](05_Pretraining/dl_pretraining.pdf) |
 
 ### Qué cubre cada lección
 
@@ -45,6 +47,8 @@ Cada fila enlaza al PDF de la presentación.
 **03. Atención.** Motivación frente a las redes recurrentes, atención por producto punto escalado, autoatención y atención cruzada, enmascaramiento causal y atención multicabeza.
 
 **04. Implementación de un GPT.** Del bloque de atención al modelo completo: GPT-2 *small* (124M), normalización por capas, red feed-forward con GELU, conexiones residuales, el bloque Transformer, `GPTModel` y la generación de texto token por token.
+
+**05. Preentrenamiento.** Evaluación de modelos generativos, entropía cruzada y perplejidad, el lazo de entrenamiento con AdamW, sobreajuste, decodificación con temperatura y top-$k$, y cómo guardar pesos o cargar los de GPT-2 de OpenAI.
 
 ---
 
