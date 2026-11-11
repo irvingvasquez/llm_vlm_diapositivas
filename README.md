@@ -2,7 +2,7 @@
 
 Diapositivas del curso **LLMs & VLMs** (modelos de lenguaje y de visión-lenguaje), impartido en el Instituto Politécnico Nacional (ESCOM / CIDETEC).
 
-El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención, la implementación de un GPT y su preentrenamiento.
+El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención, la implementación de un GPT, su preentrenamiento y los modelos de visión-lenguaje.
 
 | | |
 |---|---|
@@ -21,6 +21,7 @@ llm_vlm_diapositivas/
 ├── 03_attention/           # Mecanismos de atención
 ├── 04_LLM/                 # Implementación de un modelo GPT
 ├── 05_Pretraining/         # Preentrenamiento con datos no etiquetados
+├── 06_VLMs/                # Modelos de visión-lenguaje
 └── README.md
 ```
 
@@ -37,6 +38,7 @@ Cada fila enlaza al PDF de la presentación.
 | 03 | Mecanismos de atención | [`03_attention`](03_attention) | [PDF](03_attention/dl_attention_mechanism.pdf) |
 | 04 | Implementación de un modelo GPT | [`04_LLM`](04_LLM) | [PDF](04_LLM/dl_llm.pdf) |
 | 05 | Preentrenamiento con datos no etiquetados | [`05_Pretraining`](05_Pretraining) | [PDF](05_Pretraining/dl_pretraining.pdf) |
+| 06 | Modelos de visión-lenguaje | [`06_VLMs`](06_VLMs) | [vlms_en (English)](06_VLMs/vlms_en.pdf) |
 
 ### Qué cubre cada lección
 
@@ -49,6 +51,8 @@ Cada fila enlaza al PDF de la presentación.
 **04. Implementación de un GPT.** Del bloque de atención al modelo completo: GPT-2 *small* (124M), normalización por capas, red feed-forward con GELU, conexiones residuales, el bloque Transformer, `GPTModel` y la generación de texto token por token.
 
 **05. Preentrenamiento.** Evaluación de modelos generativos, entropía cruzada y perplejidad, el lazo de entrenamiento con AdamW, sobreajuste, decodificación con temperatura y top-$k$, y cómo guardar pesos o cargar los de GPT-2 de OpenAI.
+
+**06. Modelos de visión-lenguaje.** Qué es un VLM, su arquitectura y entrenamiento, modelos representativos, evaluación, aplicaciones y riesgos. El listado enlaza la versión en inglés, [`vlms_en`](06_VLMs/vlms_en.pdf).
 
 ---
 
