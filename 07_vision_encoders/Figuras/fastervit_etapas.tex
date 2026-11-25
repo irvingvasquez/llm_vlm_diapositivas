@@ -1,0 +1,14 @@
+\documentclass[tikz,border=4pt]{standalone}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}[node distance=3mm]
+  \node[blk, fill=black!8] (in) {Imagen};
+  \node[blk, fill=cConv!30, right=of in] (st) {Stem\\\scriptsize 2$\times$conv s2};
+  \node[blk, fill=cConv!30, right=of st] (s1) {Etapa 1\\\scriptsize Conv};
+  \node[blk, fill=cConv!30, right=of s1] (s2) {Etapa 2\\\scriptsize Conv};
+  \node[blk, fill=cAtt!30, right=of s2] (s3) {Etapa 3\\\scriptsize HAT};
+  \node[blk, fill=cAtt!30, right=of s3] (s4) {Etapa 4\\\scriptsize HAT};
+  \node[blk, fill=black!8, right=of s4] (hd) {Head};
+  \foreach \a/\b in {in/st,st/s1,s1/s2,s2/s3,s3/s4,s4/hd}{\draw[arr] (\a) -- (\b);}
+\end{tikzpicture}
+\end{document}

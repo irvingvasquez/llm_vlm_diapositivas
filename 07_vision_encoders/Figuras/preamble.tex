@@ -1,0 +1,22 @@
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.17}
+\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric}
+
+\definecolor{cVis}{HTML}{1F77B4}
+\definecolor{cTxt}{HTML}{D62728}
+\definecolor{cProj}{HTML}{2CA02C}
+\definecolor{cLLM}{HTML}{9467BD}
+\definecolor{cConv}{HTML}{FF7F0E}
+\definecolor{cAtt}{HTML}{17BECF}
+\definecolor{cGray}{HTML}{7F7F7F}
+
+\tikzset{
+  blk/.style={draw, rounded corners=2pt, minimum height=8mm, align=center, font=\footnotesize, thick},
+  tok/.style={draw, minimum size=3.2mm, inner sep=0pt},
+  arr/.style={-{Stealth[length=2mm]}, thick},
+}

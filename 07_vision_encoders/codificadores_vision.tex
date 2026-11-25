@@ -3,18 +3,13 @@
 %  Clase de posgrado — Beamer (metropolis), compilar con pdflatex
 % ============================================================
 \documentclass[aspectratio=169,10pt]{beamer}
-\usetheme[progressbar=frametitle,numbering=fraction,sectionpage=progressbar]{metropolis}
+\usetheme{metropolis}
 
-\usepackage{lmodern}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{amsmath,amssymb,bm}
 \usepackage{booktabs,multirow,array}
 \usepackage{xcolor}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning,calc,fit,backgrounds,shapes.geometric,decorations.pathreplacing,matrix}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.17}
 \usepackage{listings}
 
 % ---------- Paleta ----------
@@ -41,50 +36,28 @@
   literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1 {ñ}{{\~n}}1
 }
 
-% ---------- Estilos TikZ ----------
-\tikzset{
-  blk/.style={draw, rounded corners=2pt, minimum height=8mm, align=center, font=\footnotesize, thick},
-  tok/.style={draw, minimum size=3.2mm, inner sep=0pt},
-  arr/.style={-{Stealth[length=2mm]}, thick},
-}
-
 % ---------- Recuadros ----------
 \newcommand{\refbox}[1]{\begin{flushright}\vspace{-2mm}{\scriptsize\color{cGray}#1}\end{flushright}}
 
-\title{Codificadores de visión para Modelos Visión-Lenguaje}
-\subtitle{De ViT y CLIP a encoders jerárquicos eficientes: FasterViT y FastVLM}
-\author{Juan Irving}
-\institute{Curso de Modelos Visión-Lenguaje (VLMs) — Posgrado}
-\date{}
+\title{LLMs \& VLMs course}
+\subtitle{Codificadores de visión para VLMs}
+\author{Juan Irving Vasquez}
+\date{\today}
+\institute{Instituto Politécnico Nacional (IPN)}
+\titlegraphic{\includegraphics[height=1.2cm]{ipn-cidetec.png}\hspace{0.1cm}\includegraphics[height=1.2cm]{escudoESCOM}}
 
 \begin{document}
 
 % ============================================================
 \maketitle
 
-\begin{frame}{Agenda y lecturas}
-  \begin{columns}[T]
-    \column{.42\textwidth}
-    \footnotesize
-    \setbeamertemplate{section in toc}[sections numbered]
-    \tableofcontents
-    \column{.58\textwidth}
-    \scriptsize
-    \textbf{Lecturas de la clase}
-    \begin{enumerate}
-      \item \textbf{ViT} — Dosovitskiy et al., ICLR 2021. \texttt{arXiv:2010.11929}
-      \item \textbf{CLIP} — Radford et al., ICML 2021. \texttt{arXiv:2103.00020}
-      \item \textbf{COMM} — Jiang et al., \emph{From CLIP to DINO: Visual Encoders Shout in MLLMs}. \texttt{arXiv:2310.08825}
-      \item \textbf{FasterViT} — Hatamizadeh et al. (NVIDIA), ICLR 2024. \texttt{arXiv:2306.06189}
-      \item \textbf{FastVLM} — Vasu et al. (Apple), CVPR 2025. \texttt{arXiv:2412.13303}
-      \item \textbf{Survey} — Li et al., \emph{Frontier VLMs: Architectural Evolution, Benchmarks, Applications, and Challenges}. \texttt{arXiv:2501.02189}
-    \end{enumerate}
-    \vspace{1mm}
-    \begin{alertblock}{Ojo con los nombres}
-      \scriptsize \textbf{FasterViT} (NVIDIA, atención jerárquica) $\neq$ \textbf{FastViT} (Apple, RepMixer, base de FastVLM).
-    \end{alertblock}
-  \end{columns}
-\end{frame}
+\frame{
+	\frametitle{Contents}
+	\tableofcontents
+}
+
+\AtBeginSection[] { \begin{frame} \frametitle{Roadmap} \tableofcontents[currentsection] \end{frame} }
+
 
 
 
@@ -92,22 +65,9 @@
 \section{Contexto: el codificador de visión dentro de un VLM}
 % ============================================================
 
-\begin{frame}{Anatomía de un VLM tipo LLaVA}
+\begin{frame}{Anatomía de un VLM}
   \centering
-  \resizebox{.95\textwidth}{!}{%
-  \begin{tikzpicture}[node distance=7mm]
-    \node[blk, fill=cVis!15, minimum width=18mm, minimum height=14mm] (img) {Imagen\\$\mathbf{x}\in\mathbb{R}^{H\times W\times 3}$};
-    \node[blk, fill=cVis!35, right=of img, minimum width=24mm, minimum height=14mm] (enc) {\textbf{Codificador}\\\textbf{de visión}\\(ViT, CNN, híbrido)};
-    \node[right=6mm of enc] (vt) {\begin{tikzpicture}[scale=.9]\foreach \i in {0,...,5}{\node[tok,fill=cVis!40] at (\i*0.36,0) {};}\end{tikzpicture}};
-    \node[below=0mm of vt, font=\scriptsize] {$N_v$ tokens visuales};
-    \node[blk, fill=cProj!25, right=6mm of vt, minimum width=16mm, minimum height=14mm] (proj) {Proyector\\(MLP)};
-    \node[blk, fill=cLLM!25, right=8mm of proj, minimum width=22mm, minimum height=22mm] (llm) {\textbf{LLM}\\decodificador\\autorregresivo};
-    \node[above=8mm of proj, xshift=6mm] (tt) {\begin{tikzpicture}[scale=.9]\foreach \i in {0,...,3}{\node[tok,fill=cTxt!35] at (\i*0.36,0) {};}\end{tikzpicture}};
-    \node[above=0mm of tt, font=\scriptsize] {tokens de texto (pregunta)};
-    \node[right=6mm of llm, font=\footnotesize, align=center] (out) {Respuesta\\en texto};
-    \draw[arr] (img) -- (enc); \draw[arr] (enc) -- (vt); \draw[arr] (vt) -- (proj); \draw[arr] (proj) -- (llm);
-    \draw[arr] (tt.east) -| ([xshift=-4mm]llm.north); \draw[arr] (llm) -- (out);
-  \end{tikzpicture}}
+  \includegraphics[width=.95\textwidth]{Figuras/anatomia_llava}
 
   \vspace{4mm}
   \begin{columns}[T]
@@ -130,22 +90,7 @@
 
 \begin{frame}{Evolución de las arquitecturas VLM: ¿dónde vive el encoder?}
   \centering
-  \begin{tikzpicture}[
-      era/.style={draw, rounded corners=3pt, thick, minimum width=27.5mm, minimum height=43mm, anchor=north},
-      hd/.style={font=\footnotesize\bfseries, align=center}]
-    \foreach \x/\c/\t/\y/\body [count=\k] in {
-      0/cVis/{Era 1\\Dos torres}/{2020--2023}/{Torres separadas;\\alineación\\contrastiva o puente\\a un LM congelado\\[3pt]\textit{CLIP, ALIGN,}\\\textit{BLIP-2, Flamingo}\\[3pt]\textbf{Encoder =}\\\textbf{el producto}},
-      2.9/cProj/{Era 2\\LLM + adaptador}/{2023--2025}/{El LLM es el tronco;\\la visión entra por\\un proyector MLP\\o un resampler\\[3pt]\textit{LLaVA, Qwen2.5-VL,}\\\textit{InternVL3, GPT-4V}\\[3pt]\textbf{Encoder (SigLIP,}\\\textbf{CLIP) + MLP}},
-      5.8/cLLM/{Era 3a\\Entrada nativa}/{2025--2026}/{Un solo Transformer;\\fusión temprana de\\las modalidades;\\salida en texto\\[3pt]\textit{Gemini 3, Gemma 4,}\\\textit{Qwen3.5}\\[3pt]\textbf{Proyector más chico}\\\textbf{o desaparece}},
-      8.7/cConv/{Era 3b\\E/S unificada}/{2025--2026+}/{También genera\\imagen, video y\\audio (cabezas VAE,\\DiT o códec)\\[3pt]\textit{Janus-Pro, Emu3,}\\\textit{BAGEL}\\[3pt]\textbf{Tokens visuales}\\\textbf{de entrada y salida}},
-      11.6/cTxt/{Era 4\\Mundo–acción}/{2026 $\to$}/{Predice la dinámica\\del entorno y actúa;\\la acción es otra\\modalidad\\[3pt]\textit{Cosmos 3; precurs.}\\\textit{UniSim, GAIA-1}\\[3pt]\textbf{Percibe, genera}\\\textbf{y decide}}}{
-      \node[era, fill=\c!10, draw=\c] (e\k) at (\x,0) {};
-      \node[hd, text=\c!70!black, below=2pt of e\k.north] (h\k) {\t};
-      \node[font=\scriptsize, below=0pt of h\k] (y\k) {\y};
-      \node[font=\scriptsize, align=center, below=2pt of y\k, inner sep=0pt] {\body};
-    }
-    \foreach \a/\b in {1/2,2/3,3/4,4/5}{\draw[arr] (e\a.east) -- (e\b.west);}
-  \end{tikzpicture}
+  \includegraphics[width=\textwidth]{Figuras/evolucion_vlm}
   \vspace{1mm}
   \begin{itemize}\small
     \item En todas las eras se repiten los mismos ingredientes: un \alert{tokenizador o encoder visual}, el lado de lenguaje y un módulo de alineación. Cambia \alert{dónde ocurre la fusión} y qué produce el modelo.
@@ -181,31 +126,7 @@
 
 \begin{frame}{La idea: una imagen vale 16$\times$16 palabras}
   \centering
-  \begin{tikzpicture}[x=1cm,y=1cm]
-    % imagen con parches
-    \foreach \i in {0,1,2}{\foreach \j in {0,1,2}{
-      \pgfmathsetmacro{\c}{20+10*\i+8*\j}
-      \fill[cVis!\c] (\i*0.7,\j*0.7) rectangle ++(0.7,0.7);
-      \draw[white,thick] (\i*0.7,\j*0.7) rectangle ++(0.7,0.7);}}
-    \node[below, font=\scriptsize] at (1.05,0) {$H\times W$ en parches $P\times P$};
-    % aplanado
-    \draw[arr] (2.3,1.05) -- (3.0,1.05);
-    \foreach \k in {0,...,8}{\pgfmathsetmacro{\c}{20+6*\k}\node[tok,fill=cVis!\c,minimum width=4mm,minimum height=6mm] at (3.4+\k*0.45,1.05) {};}
-    \node[font=\scriptsize] at (5.2,0.45) {$\mathbf{x}_p^i\in\mathbb{R}^{P^2C}$ (aplanados)};
-    % proyección
-    \draw[arr] (5.2,1.5) -- (5.2,2.05);
-    \node[blk, fill=cProj!25, minimum width=46mm, minimum height=5mm] at (5.2,2.35) {Proyección lineal $\mathbf{E}$ (= conv $P\times P$, stride $P$)};
-    \draw[arr] (5.2,2.65) -- (5.2,3.1);
-    % tokens con cls + pos
-    \node[tok,fill=cTxt!40,minimum width=4mm,minimum height=6mm] at (2.9,3.45) {\tiny$\ast$};
-    \foreach \k in {0,...,8}{\node[tok,fill=cVis!35,minimum width=4mm,minimum height=6mm] at (3.4+\k*0.45,3.45) {};}
-    \node[font=\scriptsize, anchor=west] at (7.6,3.45) {$+\;\mathbf{E}_{pos}$};
-    \node[font=\scriptsize, anchor=east] at (2.6,3.45) {[CLS]};
-    \draw[arr] (5.2,3.8) -- (5.2,4.15);
-    \node[blk, fill=cAtt!25, minimum width=46mm] at (5.2,4.55) {Transformer encoder $\times L$\\[-1pt]\scriptsize (LN $\to$ MSA $\to$ LN $\to$ MLP, residuales)};
-    \draw[arr] (2.9,3.8) .. controls (2.9,4.6) and (2.9,5.2) .. (3.3,5.35);
-    \node[blk, fill=cLLM!20, minimum width=20mm, minimum height=6mm] at (4.3,5.45) {\scriptsize MLP head};
-  \end{tikzpicture}
+  \includegraphics[height=.7\textheight]{Figuras/vit_parches}
   \begin{itemize}\small
     \item Transformer estándar de NLP, \alert{casi sin modificaciones}; único sesgo de imagen: el corte en parches (y el ajuste de resolución en fine-tuning).
   \end{itemize}
@@ -312,13 +233,7 @@
     \small\textbf{Relevancia hoy:} así se adaptan los CLIP-ViT de $224$ a $336$ (o más) en VLMs; pero el costo sigue creciendo como $\mathcal{O}(N^2)$.
     \column{.45\textwidth}
     \centering
-    \begin{tikzpicture}[scale=.55]
-      \foreach \i in {0,...,3}{\foreach \j in {0,...,3}{\pgfmathsetmacro{\c}{15+12*\i+6*\j}\fill[cVis!\c] (\i,\j) rectangle ++(1,1);\draw[white] (\i,\j) rectangle ++(1,1);}}
-      \node[below,font=\scriptsize] at (2,0) {$\mathbf{E}_{pos}$: $4\times4$};
-      \draw[arr] (4.4,2) -- (5.4,2) node[midway,above,font=\scriptsize]{bicúbica};
-      \foreach \i in {0,...,5}{\foreach \j in {0,...,5}{\pgfmathsetmacro{\c}{15+8*\i+4*\j}\fill[cVis!\c] (5.8+\i*0.667,\j*0.667) rectangle ++(0.667,0.667);\draw[white] (5.8+\i*0.667,\j*0.667) rectangle ++(0.667,0.667);}}
-      \node[below,font=\scriptsize] at (7.8,0) {$6\times6$};
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/vit_pos_interp}
   \end{columns}
   \refbox{ViT, §3.2 (Fine-tuning and higher resolution)}
 \end{frame}
@@ -359,21 +274,7 @@
   \begin{columns}[c]
     \column{.58\textwidth}
     \centering
-    \begin{tikzpicture}[scale=.82, every node/.style={transform shape}]
-      \node[blk, fill=cTxt!20, minimum width=26mm] (te) at (0,4.2) {Text Encoder};
-      \node[font=\scriptsize, align=center] (tx) at (-3.0,4.2) {``un perro\\en la playa''};
-      \draw[arr] (tx) -- (te);
-      \foreach \j in {1,...,4}{\node[tok,fill=cTxt!30,minimum size=7mm] (T\j) at (0.4+\j*0.85,3.1) {\scriptsize$T_\j$};}
-      \draw[arr] (te.south) -- ++(0,-0.25) -| (T1.north);
-      \node[blk, fill=cVis!25, minimum width=18mm, minimum height=10mm] (ie) at (-1.1,0.8) {Image\\Encoder};
-      \node[font=\scriptsize] (ix) at (-3.0,0.8) {imagen};
-      \draw[arr] (ix) -- (ie);
-      \foreach \i in {1,...,4}{\node[tok,fill=cVis!30,minimum size=7mm] (I\i) at (0.55,2.45-\i*0.85) {\scriptsize$I_\i$};}
-      \draw[arr] (ie.east) -- (I1.west |- ie.east);
-      \foreach \i in {1,...,4}{\foreach \j in {1,...,4}{
-        \ifnum\i=\j \def\cc{cProj!60}\else \def\cc{black!6}\fi
-        \node[tok,fill=\cc,minimum size=7mm] at (0.4+\j*0.85,2.45-\i*0.85) {\tiny$I_\i\!\cdot\! T_\j$};}}
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/clip_doble_torre}
     \column{.42\textwidth}
     \small
     \begin{itemize}
@@ -428,16 +329,7 @@ loss   = (loss_i + loss_t) / 2
   \begin{columns}[c]
     \column{.5\textwidth}
     \centering
-    \begin{tikzpicture}
-      \begin{axis}[
-        xbar, width=6.4cm, height=4.2cm, xmin=0, xmax=16,
-        symbolic y coords={lm,bow,clip}, ytick=data, yticklabels={Transformer LM (captions),Bag-of-words predictivo,Bag-of-words contrastivo (CLIP)}, yticklabel style={font=\scriptsize, align=right, text width=3.0cm},
-        xlabel={\scriptsize eficiencia relativa (aprox.)}, xticklabel style={font=\scriptsize},
-        nodes near coords={\scriptsize$\times$\pgfmathprintnumber\pgfplotspointmeta}, nodes near coords align={horizontal},
-        bar width=4mm, enlarge y limits=0.3, axis lines*=left]
-        \addplot[fill=cVis!50] coordinates {(1,lm) (3,bow) (12,clip)};
-      \end{axis}
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/clip_eficiencia}
     \column{.5\textwidth}
     \small
     \begin{itemize}
@@ -485,18 +377,7 @@ loss   = (loss_i + loss_t) / 2
   \begin{columns}[c]
     \column{.52\textwidth}
     \centering
-    \begin{tikzpicture}[scale=.85, every node/.style={transform shape}]
-      \node[font=\scriptsize, align=left, draw=cTxt, rounded corners, fill=cTxt!8] (p) at (0,2.2) {``A photo of a \{\textbf{label}\}.''};
-      \node[blk, fill=cTxt!20] (te) at (0,1.1) {Text Encoder};
-      \draw[arr] (p) -- (te);
-      \foreach \j in {1,...,4}{\node[tok,fill=cTxt!30,minimum size=6mm] (T\j) at (2.0+\j*0.7,1.1) {\scriptsize$T_\j$};}
-      \draw[arr] (te) -- (T1);
-      \node[blk, fill=cVis!25] (ie) at (0,-0.4) {Image Encoder};
-      \node[tok,fill=cVis!30,minimum size=6mm] (I1) at (2.0,-0.4) {\scriptsize$I$};
-      \draw[arr] (ie) -- (I1);
-      \foreach \j in {1,...,4}{\ifnum\j=3 \def\cc{cProj!60}\else\def\cc{black!6}\fi\node[tok,fill=\cc,minimum size=6mm] at (2.0+\j*0.7,-0.4) {\tiny$I\!\cdot\!T_\j$};}
-      \node[font=\scriptsize] at (4.1,-1.05) {$\arg\max \Rightarrow$ clase 3};
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/clip_zeroshot}
     \[
       p(y=k\mid \mathbf{x}) = \frac{\exp(\langle \mathbf{I},\mathbf{T}_k\rangle/\tau)}{\sum_{j}\exp(\langle \mathbf{I},\mathbf{T}_j\rangle/\tau)}
     \]
@@ -615,24 +496,7 @@ loss   = (loss_i + loss_t) / 2
   \begin{columns}[c]
     \column{.56\textwidth}
     \centering
-    \begin{tikzpicture}
-      \begin{semilogyaxis}[
-        width=7.4cm, height=5.4cm, xmin=200, xmax=1100, ymin=8, ymax=12000,
-        xlabel={\small resolución $r$ (lado, px)}, ylabel={\small tokens visuales $N_v$},
-        xtick={256,336,512,768,1024}, xticklabel style={font=\scriptsize}, yticklabel style={font=\scriptsize},
-        legend style={font=\scriptsize, at={(0.98,0.02)}, anchor=south east}, grid=major, grid style={black!10}]
-        \addplot[cVis, very thick, domain=224:1024, samples=40] {(x/14)^2};
-        \addlegendentry{ViT, $P{=}14$: $(r/14)^2$}
-        \addplot[cConv, very thick, domain=224:1024, samples=40] {(x/32)^2};
-        \addlegendentry{jerárquico, stride 32}
-        \addplot[cProj, very thick, domain=224:1024, samples=40] {(x/64)^2};
-        \addlegendentry{FastViTHD, stride 64}
-        \addplot[only marks, mark=*, cVis] coordinates {(336,576)};
-        \node[font=\scriptsize, anchor=west] at (axis cs:345,500) {LLaVA-1.5};
-        \addplot[only marks, mark=*, cProj] coordinates {(1024,256)};
-        \node[font=\scriptsize, anchor=east] at (axis cs:1010,200) {256};
-      \end{semilogyaxis}
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/tokens_resolucion}
     \column{.44\textwidth}
     \small
     \textbf{Dos costos que suben con $r$:}
@@ -668,22 +532,7 @@ loss   = (loss_i + loss_t) / 2
 
 \begin{frame}{Isotrópico vs. jerárquico}
   \centering
-  \begin{tikzpicture}[x=1cm,y=1cm]
-    \node[font=\small\bfseries] at (2.4,3.2) {ViT (isotrópico)};
-    \foreach \k in {0,...,4}{\draw[fill=cAtt!30] (\k*1.05,0) rectangle ++(0.8,2.6);}
-    \node[font=\scriptsize] at (2.4,-0.35) {$N$ tokens constante en todas las capas};
-    \node[font=\small\bfseries] at (10.1,3.2) {Jerárquico (CNN / híbrido)};
-    \draw[fill=cConv!35] (7.2,0) rectangle ++(1.0,2.6);
-    \draw[fill=cConv!35] (8.5,0.35) rectangle ++(1.0,1.9);
-    \draw[fill=cAtt!35] (9.8,0.65) rectangle ++(1.0,1.3);
-    \draw[fill=cAtt!35] (11.1,0.9) rectangle ++(1.0,0.8);
-    \draw[fill=cAtt!35] (12.4,1.05) rectangle ++(1.0,0.5);
-    \node[font=\scriptsize] at (7.7,2.85) {/4}; \node[font=\scriptsize] at (9.0,2.5) {/8};
-    \node[font=\scriptsize] at (10.3,2.2) {/16}; \node[font=\scriptsize] at (11.6,1.95) {/32}; \node[font=\scriptsize] at (12.9,1.8) {/64};
-    \node[font=\scriptsize] at (10.1,-0.35) {resolución $\downarrow$, canales $\uparrow$};
-    \node[font=\scriptsize, text=cConv, anchor=west] at (6.6,-0.8) {\textbf{conv}: local, barata a alta resolución};
-    \node[font=\scriptsize, text=cAtt!80!black, anchor=west] at (6.6,-1.2) {\textbf{atención}: global, con pocos tokens};
-  \end{tikzpicture}
+  \includegraphics[width=\textwidth]{Figuras/isotropico_jerarquico}
   \vspace{3mm}
   \begin{itemize}\small
     \item Un encoder jerárquico \alert{reduce tokens de manera natural}: no hace falta podar después.
@@ -714,16 +563,7 @@ loss   = (loss_i + loss_t) / 2
   \end{columns}
   \vspace{4mm}
   \centering
-  \begin{tikzpicture}[node distance=3mm]
-    \node[blk, fill=black!8] (in) {Imagen};
-    \node[blk, fill=cConv!30, right=of in] (st) {Stem\\\scriptsize 2$\times$conv s2};
-    \node[blk, fill=cConv!30, right=of st] (s1) {Etapa 1\\\scriptsize Conv};
-    \node[blk, fill=cConv!30, right=of s1] (s2) {Etapa 2\\\scriptsize Conv};
-    \node[blk, fill=cAtt!30, right=of s2] (s3) {Etapa 3\\\scriptsize HAT};
-    \node[blk, fill=cAtt!30, right=of s3] (s4) {Etapa 4\\\scriptsize HAT};
-    \node[blk, fill=black!8, right=of s4] (hd) {Head};
-    \foreach \a/\b in {in/st,st/s1,s1/s2,s2/s3,s3/s4,s4/hd}{\draw[arr] (\a) -- (\b);}
-  \end{tikzpicture}
+  \includegraphics[width=\textwidth]{Figuras/fastervit_etapas}
 
   \small Bloque conv: $\hat{\mathbf{x}}=\mathrm{GELU}(\mathrm{BN}(\mathrm{Conv}_{3\times3}(\mathbf{x})))$,\ \ $\mathbf{x}\leftarrow\mathrm{BN}(\mathrm{Conv}_{3\times3}(\hat{\mathbf{x}}))+\mathbf{x}$; downsampling: LN 2D + conv $3\times3$ stride 2.
   \refbox{Hatamizadeh et al., FasterViT (2024), §3.1–§3.3}
@@ -733,15 +573,7 @@ loss   = (loss_i + loss_t) / 2
   \begin{columns}[c]
     \column{.42\textwidth}
     \centering
-    \begin{tikzpicture}[scale=.5]
-      \foreach \wi in {0,1}{\foreach \wj in {0,1}{
-        \pgfmathsetmacro{\ox}{\wi*4.4}\pgfmathsetmacro{\oy}{\wj*4.4}
-        \foreach \i in {0,...,3}{\foreach \j in {0,...,3}{\draw[fill=cVis!20] (\ox+\i,\oy+\j) rectangle ++(1,1);}}
-        \draw[very thick, cVis] (\ox,\oy) rectangle ++(4,4);
-        \node[circle, fill=cTxt!70, inner sep=2.5pt] (c\wi\wj) at (\ox+2,\oy+2) {};}}
-      \draw[cTxt, thick, densely dashed] (c00) -- (c01) -- (c11) -- (c10) -- (c00) -- (c11); \draw[cTxt, thick, densely dashed] (c01) -- (c10);
-      \node[font=\scriptsize, align=center] at (4.2,-0.8) {ventanas locales $k\times k$ (azul) + 1 carrier token\\por ventana (rojo) con atención global entre CTs};
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/hat_carrier_tokens}
     \column{.58\textwidth}
     \small
     \begin{enumerate}
@@ -865,18 +697,7 @@ loss   = (loss_i + loss_t) / 2
 
 \begin{frame}{FastViTHD: un encoder diseñado para VLMs de alta resolución}
   \centering
-  \begin{tikzpicture}[node distance=2.5mm]
-    \node[blk, fill=black!8, minimum height=12mm] (in) {Imagen\\\scriptsize $1024^2$};
-    \node[blk, fill=cConv!20, right=of in, minimum height=12mm] (st) {Stem\\\scriptsize conv};
-    \node[blk, fill=cConv!35, right=of st, minimum height=12mm] (s1) {Etapa 1\\\scriptsize RepMixer\\\scriptsize $\times2$, $d{=}96$};
-    \node[blk, fill=cConv!35, right=of s1, minimum height=12mm] (s2) {Etapa 2\\\scriptsize RepMixer\\\scriptsize $\times12$, 192};
-    \node[blk, fill=cConv!35, right=of s2, minimum height=12mm] (s3) {Etapa 3\\\scriptsize RepMixer\\\scriptsize $\times24$, 384};
-    \node[blk, fill=cAtt!35, right=of s3, minimum height=12mm] (s4) {Etapa 4\\\scriptsize MHSA\\\scriptsize $\times4$, 768};
-    \node[blk, fill=cAtt!35, right=of s4, minimum height=12mm] (s5) {Etapa 5\\\scriptsize MHSA\\\scriptsize $\times2$, 1536};
-    \foreach \a/\b in {in/st,st/s1,s1/s2,s2/s3,s3/s4,s4/s5}{\draw[arr] (\a) -- (\b);}
-    \foreach \n/\l in {s1/{/4\ \ $256^2$},s2/{/8\ \ $128^2$},s3/{/16\ \ $64^2$},s4/{/32\ \ $32^2$},s5/{/64\ \ $16^2$}}{\node[below=1mm of \n, font=\scriptsize] {\l};}
-    \node[right=3mm of s5, font=\scriptsize, align=center, text=cProj!70!black] {\textbf{256}\\tokens};
-  \end{tikzpicture}
+  \includegraphics[width=\textwidth]{Figuras/fastvithd_etapas}
   \vspace{3mm}
   \begin{columns}[T]
     \column{.5\textwidth}
@@ -920,18 +741,7 @@ loss   = (loss_i + loss_t) / 2
     \end{tabular}
     \column{.42\textwidth}
     \centering
-    \begin{tikzpicture}
-      \begin{axis}[width=5.6cm, height=4.6cm, xlabel={\scriptsize latencia del encoder (ms)}, ylabel={\scriptsize Avg-5},
-        xmode=log, xticklabel style={font=\scriptsize}, yticklabel style={font=\scriptsize},
-        legend style={font=\tiny, at={(0.98,0.02)}, anchor=south east}, grid=major, grid style={black!10}]
-        \addplot[cProj, very thick, mark=*] coordinates {(10.1,55.5) (33.5,60.4) (122.6,62.8) (235.6,63.9)};
-        \addlegendentry{FastViTHD}
-        \addplot[cConv, thick, mark=square*] coordinates {(34.4,57.7) (71.9,61.3)};
-        \addlegendentry{ConvNeXt-L}
-        \addplot[cTxt, thick, mark=triangle*] coordinates {(89.9,58.3) (397.1,63.9)};
-        \addlegendentry{ConvNeXt-XXL}
-      \end{axis}
-    \end{tikzpicture}
+    \includegraphics[width=\linewidth]{Figuras/fastvithd_pareto}
   \end{columns}
   \vspace{2mm}
   \small FastViTHD iguala a ConvNeXt-XXL (Avg-5 63.9) siendo \alert{6.8$\times$ más pequeño} y \alert{3.3$\times$ más rápido}. Frente a ViT-L/14 en zero-shot CLIP (38 tareas): rendimiento comparable, 2.4$\times$ más pequeño y 6.9$\times$ más rápido.
@@ -1065,6 +875,24 @@ loss   = (loss_i + loss_t) / 2
   \end{enumerate}
 \end{frame}
 
+
+\begin{frame}{Lecturas de la clase}
+	\small
+	\begin{enumerate}
+		\item \textbf{ViT} — Dosovitskiy et al., ICLR 2021. \texttt{arXiv:2010.11929}
+		\item \textbf{CLIP} — Radford et al., ICML 2021. \texttt{arXiv:2103.00020}
+		\item \textbf{COMM} — Jiang et al., \emph{From CLIP to DINO: Visual Encoders Shout in MLLMs}. \texttt{arXiv:2310.08825}
+		\item \textbf{FasterViT} — Hatamizadeh et al. (NVIDIA), ICLR 2024. \texttt{arXiv:2306.06189}
+		\item \textbf{FastVLM} — Vasu et al. (Apple), CVPR 2025. \texttt{arXiv:2412.13303}
+		\item \textbf{Survey} — Li et al., \emph{Frontier VLMs: Architectural Evolution, Benchmarks, Applications, and Challenges}. \texttt{arXiv:2501.02189}
+	\end{enumerate}
+	\vspace{2mm}
+	\begin{alertblock}{Ojo con los nombres}
+		\textbf{FasterViT} (NVIDIA, atención jerárquica) $\neq$ \textbf{FastViT} (Apple, RepMixer, base de FastVLM).
+	\end{alertblock}
+\end{frame}
+
+
 \begin{frame}{Referencias}
   \scriptsize
   \begin{enumerate}\setlength{\itemsep}{1.5pt}
@@ -1078,6 +906,10 @@ loss   = (loss_i + loss_t) / 2
     \item H.~Liu, C.~Li, Q.~Wu, Y.~J.~Lee. \emph{Visual Instruction Tuning} (LLaVA). NeurIPS, 2023. arXiv:2304.08485.
     \item H.~Liu, C.~Li, Y.~Li, Y.~J.~Lee. \emph{Improved Baselines with Visual Instruction Tuning} (LLaVA-1.5). CVPR, 2024. arXiv:2310.03744.
   \end{enumerate}
+\end{frame}
+
+\begin{frame}[standout]
+	Preguntas
 \end{frame}
 
 \end{document}

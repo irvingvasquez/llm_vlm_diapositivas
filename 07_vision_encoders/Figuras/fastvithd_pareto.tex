@@ -1,0 +1,16 @@
+\documentclass[tikz,border=4pt]{standalone}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[width=5.6cm, height=4.6cm, xlabel={\scriptsize latencia del encoder (ms)}, ylabel={\scriptsize Avg-5},
+    xmode=log, xticklabel style={font=\scriptsize}, yticklabel style={font=\scriptsize},
+    legend style={font=\tiny, at={(0.98,0.02)}, anchor=south east}, grid=major, grid style={black!10}]
+    \addplot[cProj, very thick, mark=*] coordinates {(10.1,55.5) (33.5,60.4) (122.6,62.8) (235.6,63.9)};
+    \addlegendentry{FastViTHD}
+    \addplot[cConv, thick, mark=square*] coordinates {(34.4,57.7) (71.9,61.3)};
+    \addlegendentry{ConvNeXt-L}
+    \addplot[cTxt, thick, mark=triangle*] coordinates {(89.9,58.3) (397.1,63.9)};
+    \addlegendentry{ConvNeXt-XXL}
+  \end{axis}
+\end{tikzpicture}
+\end{document}

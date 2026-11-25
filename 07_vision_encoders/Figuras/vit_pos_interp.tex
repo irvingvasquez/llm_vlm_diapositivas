@@ -1,0 +1,11 @@
+\documentclass[tikz,border=4pt]{standalone}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}[scale=.55]
+  \foreach \i in {0,...,3}{\foreach \j in {0,...,3}{\pgfmathsetmacro{\c}{15+12*\i+6*\j}\fill[cVis!\c] (\i,\j) rectangle ++(1,1);\draw[white] (\i,\j) rectangle ++(1,1);}}
+  \node[below,font=\scriptsize] at (2,0) {$\mathbf{E}_{pos}$: $4\times4$};
+  \draw[arr] (4.4,2) -- (5.4,2) node[midway,above,font=\scriptsize]{bicúbica};
+  \foreach \i in {0,...,5}{\foreach \j in {0,...,5}{\pgfmathsetmacro{\c}{15+8*\i+4*\j}\fill[cVis!\c] (5.8+\i*0.667,\j*0.667) rectangle ++(0.667,0.667);\draw[white] (5.8+\i*0.667,\j*0.667) rectangle ++(0.667,0.667);}}
+  \node[below,font=\scriptsize] at (7.8,0) {$6\times6$};
+\end{tikzpicture}
+\end{document}

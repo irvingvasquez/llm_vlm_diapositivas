@@ -1,0 +1,16 @@
+\documentclass[tikz,border=4pt]{standalone}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}[scale=.85, every node/.style={transform shape}]
+  \node[font=\scriptsize, align=left, draw=cTxt, rounded corners, fill=cTxt!8] (p) at (0,2.2) {``A photo of a \{\textbf{label}\}.''};
+  \node[blk, fill=cTxt!20] (te) at (0,1.1) {Text Encoder};
+  \draw[arr] (p) -- (te);
+  \foreach \j in {1,...,4}{\node[tok,fill=cTxt!30,minimum size=6mm] (T\j) at (2.0+\j*0.7,1.1) {\scriptsize$T_\j$};}
+  \draw[arr] (te) -- (T1);
+  \node[blk, fill=cVis!25] (ie) at (0,-0.4) {Image Encoder};
+  \node[tok,fill=cVis!30,minimum size=6mm] (I1) at (2.0,-0.4) {\scriptsize$I$};
+  \draw[arr] (ie) -- (I1);
+  \foreach \j in {1,...,4}{\ifnum\j=3 \def\cc{cProj!60}\else\def\cc{black!6}\fi\node[tok,fill=\cc,minimum size=6mm] at (2.0+\j*0.7,-0.4) {\tiny$I\!\cdot\!T_\j$};}
+  \node[font=\scriptsize] at (4.1,-1.05) {$\arg\max \Rightarrow$ clase 3};
+\end{tikzpicture}
+\end{document}

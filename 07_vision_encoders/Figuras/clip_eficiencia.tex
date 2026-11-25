@@ -1,0 +1,14 @@
+\documentclass[tikz,border=4pt]{standalone}
+\input{preamble.tex}
+\begin{document}
+\begin{tikzpicture}
+  \begin{axis}[
+    xbar, width=6.4cm, height=4.2cm, xmin=0, xmax=16,
+    symbolic y coords={lm,bow,clip}, ytick=data, yticklabels={Transformer LM (captions),Bag-of-words predictivo,Bag-of-words contrastivo (CLIP)}, yticklabel style={font=\scriptsize, align=right, text width=3.0cm},
+    xlabel={\scriptsize eficiencia relativa (aprox.)}, xticklabel style={font=\scriptsize},
+    nodes near coords={\scriptsize$\times$\pgfmathprintnumber\pgfplotspointmeta}, nodes near coords align={horizontal},
+    bar width=4mm, enlarge y limits=0.3, axis lines*=left]
+    \addplot[fill=cVis!50] coordinates {(1,lm) (3,bow) (12,clip)};
+  \end{axis}
+\end{tikzpicture}
+\end{document}
