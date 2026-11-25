@@ -62,23 +62,31 @@
 % ============================================================
 \maketitle
 
-\begin{frame}{Agenda}
-  \setbeamertemplate{section in toc}[sections numbered]
-  \tableofcontents
+\begin{frame}{Agenda y lecturas}
+  \begin{columns}[T]
+    \column{.42\textwidth}
+    \footnotesize
+    \setbeamertemplate{section in toc}[sections numbered]
+    \tableofcontents
+    \column{.58\textwidth}
+    \scriptsize
+    \textbf{Lecturas de la clase}
+    \begin{enumerate}
+      \item \textbf{ViT} — Dosovitskiy et al., ICLR 2021. \texttt{arXiv:2010.11929}
+      \item \textbf{CLIP} — Radford et al., ICML 2021. \texttt{arXiv:2103.00020}
+      \item \textbf{COMM} — Jiang et al., \emph{From CLIP to DINO: Visual Encoders Shout in MLLMs}. \texttt{arXiv:2310.08825}
+      \item \textbf{FasterViT} — Hatamizadeh et al. (NVIDIA), ICLR 2024. \texttt{arXiv:2306.06189}
+      \item \textbf{FastVLM} — Vasu et al. (Apple), CVPR 2025. \texttt{arXiv:2412.13303}
+      \item \textbf{Survey} — Li et al., \emph{Frontier VLMs: Architectural Evolution, Benchmarks, Applications, and Challenges}. \texttt{arXiv:2501.02189}
+    \end{enumerate}
+    \vspace{1mm}
+    \begin{alertblock}{Ojo con los nombres}
+      \scriptsize \textbf{FasterViT} (NVIDIA, atención jerárquica) $\neq$ \textbf{FastViT} (Apple, RepMixer, base de FastVLM).
+    \end{alertblock}
+  \end{columns}
 \end{frame}
 
-\begin{frame}{Referencias principales de la clase}
-  \begin{enumerate}
-    \item \textbf{ViT} — Dosovitskiy et al., \emph{An Image is Worth 16$\times$16 Words: Transformers for Image Recognition at Scale}, ICLR 2021. \texttt{arXiv:2010.11929}
-    \item \textbf{CLIP} — Radford et al., \emph{Learning Transferable Visual Models From Natural Language Supervision}, ICML 2021. \texttt{arXiv:2103.00020}
-    \item \textbf{FasterViT} — Hatamizadeh et al. (NVIDIA), \emph{FasterViT: Fast Vision Transformers with Hierarchical Attention}, ICLR 2024. \texttt{arXiv:2306.06189}
-    \item \textbf{FastVLM} — Vasu et al. (Apple), \emph{FastVLM: Efficient Vision Encoding for Vision Language Models}, CVPR 2025. \texttt{arXiv:2412.13303}
-  \end{enumerate}
-  \vspace{2mm}
-  \begin{alertblock}{Ojo con los nombres}
-    \textbf{FasterViT} (NVIDIA, atención jerárquica) $\neq$ \textbf{FastViT} (Apple, RepMixer). FastVLM parte de \emph{FastViT} de Apple; FasterViT lo estudiamos como otra respuesta al mismo problema: atención eficiente a alta resolución.
-  \end{alertblock}
-\end{frame}
+
 
 % ============================================================
 \section{Contexto: el codificador de visión dentro de un VLM}
@@ -118,6 +126,32 @@
     \end{itemize}
   \end{columns}
   \refbox{Liu et al., LLaVA, NeurIPS 2023 (arXiv:2304.08485); Liu et al., LLaVA-1.5, CVPR 2024 (arXiv:2310.03744)}
+\end{frame}
+
+\begin{frame}{Evolución de las arquitecturas VLM: ¿dónde vive el encoder?}
+  \centering
+  \begin{tikzpicture}[
+      era/.style={draw, rounded corners=3pt, thick, minimum width=27.5mm, minimum height=43mm, anchor=north},
+      hd/.style={font=\footnotesize\bfseries, align=center}]
+    \foreach \x/\c/\t/\y/\body [count=\k] in {
+      0/cVis/{Era 1\\Dos torres}/{2020--2023}/{Torres separadas;\\alineación\\contrastiva o puente\\a un LM congelado\\[3pt]\textit{CLIP, ALIGN,}\\\textit{BLIP-2, Flamingo}\\[3pt]\textbf{Encoder =}\\\textbf{el producto}},
+      2.9/cProj/{Era 2\\LLM + adaptador}/{2023--2025}/{El LLM es el tronco;\\la visión entra por\\un proyector MLP\\o un resampler\\[3pt]\textit{LLaVA, Qwen2.5-VL,}\\\textit{InternVL3, GPT-4V}\\[3pt]\textbf{Encoder (SigLIP,}\\\textbf{CLIP) + MLP}},
+      5.8/cLLM/{Era 3a\\Entrada nativa}/{2025--2026}/{Un solo Transformer;\\fusión temprana de\\las modalidades;\\salida en texto\\[3pt]\textit{Gemini 3, Gemma 4,}\\\textit{Qwen3.5}\\[3pt]\textbf{Proyector más chico}\\\textbf{o desaparece}},
+      8.7/cConv/{Era 3b\\E/S unificada}/{2025--2026+}/{También genera\\imagen, video y\\audio (cabezas VAE,\\DiT o códec)\\[3pt]\textit{Janus-Pro, Emu3,}\\\textit{BAGEL}\\[3pt]\textbf{Tokens visuales}\\\textbf{de entrada y salida}},
+      11.6/cTxt/{Era 4\\Mundo–acción}/{2026 $\to$}/{Predice la dinámica\\del entorno y actúa;\\la acción es otra\\modalidad\\[3pt]\textit{Cosmos 3; precurs.}\\\textit{UniSim, GAIA-1}\\[3pt]\textbf{Percibe, genera}\\\textbf{y decide}}}{
+      \node[era, fill=\c!10, draw=\c] (e\k) at (\x,0) {};
+      \node[hd, text=\c!70!black, below=2pt of e\k.north] (h\k) {\t};
+      \node[font=\scriptsize, below=0pt of h\k] (y\k) {\y};
+      \node[font=\scriptsize, align=center, below=2pt of y\k, inner sep=0pt] {\body};
+    }
+    \foreach \a/\b in {1/2,2/3,3/4,4/5}{\draw[arr] (e\a.east) -- (e\b.west);}
+  \end{tikzpicture}
+  \vspace{1mm}
+  \begin{itemize}\small
+    \item En todas las eras se repiten los mismos ingredientes: un \alert{tokenizador o encoder visual}, el lado de lenguaje y un módulo de alineación. Cambia \alert{dónde ocurre la fusión} y qué produce el modelo.
+    \item Esta clase se centra en las eras 1 (CLIP) y 2 (LLaVA, COMM, FastVLM), donde el encoder es un módulo identificable y sustituible.
+  \end{itemize}
+  \refbox{Li et al., Survey (2026), §2–§3.4 y Fig.~2}
 \end{frame}
 
 \begin{frame}{¿Qué le pedimos a un codificador de visión para VLMs?}
@@ -290,7 +324,7 @@
 \end{frame}
 
 % ============================================================
-\section{CLIP: supervisión con lenguaje natural}
+\section{CLIP y más allá: ¿qué encoder y qué capa?}
 % ============================================================
 
 \begin{frame}{Motivación}
@@ -478,31 +512,99 @@ loss   = (loss_i + loss_t) / 2
   \refbox{CLIP, §3.1}
 \end{frame}
 
-\begin{frame}{Robustez, límites y por qué CLIP domina los VLMs}
+\begin{frame}{Por qué CLIP domina los VLMs\dots\ y dónde se queda corto}
   \begin{columns}[T]
-    \column{.5\textwidth}
+    \column{.48\textwidth}
     \textbf{Fortalezas}
     \begin{itemize}\small
-      \item Mucho más \alert{robusto a cambios de distribución} (ImageNet-V2, Sketch, R, A, ObjectNet) que modelos supervisados con igual precisión en ImageNet.
-      \item El \emph{linear probe} sobre features de CLIP supera a los mejores modelos de ImageNet en la mayoría de los datasets evaluados.
+      \item Más \alert{robusto a cambios de distribución} (ImageNet-V2, Sketch, R, A, ObjectNet) que supervisados con igual precisión.
+      \item Sus features ya ``\alert{hablan el idioma}'' del texto: al VLM le basta un proyector simple.
+      \item Vocabulario visual abierto; escala bien con datos.
     \end{itemize}
-    \textbf{Debilidades reportadas}
+    \small Descendientes en VLMs: SigLIP (pérdida sigmoide), EVA-CLIP, DFN-CLIP, InternViT, MobileCLIP\dots
+    \column{.52\textwidth}
+    \textbf{Límites (según CLIP)}
     \begin{itemize}\small
-      \item Tareas finas (modelos de autos, aviones), abstractas (contar objetos) o fuera de distribución (MNIST).
-      \item Sesgos heredados de los datos de Internet.
+      \item Tareas finas (modelos de autos), abstractas (contar) o fuera de distribución (MNIST); sesgos de datos web.
     \end{itemize}
-    \column{.5\textwidth}
-    \begin{exampleblock}{Por qué es el encoder por defecto}
-      \small
-      \begin{enumerate}
-        \item Sus features ya ``\alert{hablan el idioma}'' del texto: el proyector del VLM sólo tiene que hacer un mapeo simple.
-        \item Cubre un vocabulario visual abierto.
-        \item Escala bien con datos y cómputo.
-      \end{enumerate}
-    \end{exampleblock}
-    \small Descendientes usados en VLMs: SigLIP (pérdida sigmoide), EVA-CLIP, DFN-CLIP, InternViT, MobileCLIP\dots
+    \textbf{Límites como rama visual (según COMM)}
+    \begin{itemize}\small
+      \item Supervisión \alert{global} (captions): pierde detalle a nivel píxel (color, posición) $\Rightarrow$ peor \emph{grounding}, más alucinación.
+      \item Se usan sólo capas \alert{profundas} (penúltima), que codifican lo global.
+      \item Desbalance ViT-L ($\sim$300M) vs.\ Vicuna 7B/13B: por el ``\alert{efecto cubeta}'', el encoder es la tabla más corta.
+    \end{itemize}
   \end{columns}
-  \refbox{CLIP, §3.3, §6; FastVLM, §2}
+  \refbox{CLIP, §3.3 y §6; Jiang et al., COMM (2024), §1 y §3}
+\end{frame}
+
+\begin{frame}{¿Qué paradigma de preentrenamiento sirve como rama visual?}
+  \small
+  COMM: 4 encoders ViT-L + Vicuna-7B (tipo Shikra), evaluados en \emph{grounding} (REC), alucinación (POPE), regiones (REG), VQA y MME.
+
+  \centering\footnotesize
+  \begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{1.9cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{5.4cm}}
+    \toprule
+    Paradigma & Ejemplo & Señal de entrenamiento & Resultado como rama visual \\
+    \midrule
+    Contrastivo imagen–texto & CLIP, EVA-CLIP & captions (global) & Buena semántica y fácil de alinear; detalle fino limitado en capas profundas \\
+    \addlinespace
+    Autosupervisado sólo imagen & DINOv2 & imágenes curadas, sin texto & Con un \alert{MLP} para alinear, \alert{supera a CLIP en grounding}; semántica aceptable \\
+    \addlinespace
+    Imagen enmascarada (MIM) & MAE & reconstruir píxeles & REC aceptable, pero cae mucho en POPE y REG: \alert{poca semántica} \\
+    \addlinespace
+    Supervisado & DeiT & etiquetas de ImageNet & El peor: espacio muy especializado, \alert{difícil de alinear} con el texto \\
+    \bottomrule
+  \end{tabular}
+  \vspace{1mm}
+  \raggedright\footnotesize
+  La survey agrupa los encoders en dos familias: preentrenados con \textbf{pares imagen–texto} (CLIP, BLIP) y en \textbf{ImageNet o similares}, supervisados o autosupervisados (ResNet, ViT). Ambas superan a un encoder entrenado desde cero.
+  \refbox{COMM, §3 y Fig.~2; Survey, §3.1}
+\end{frame}
+
+\begin{frame}{¿Qué capa? COMM: fusión multinivel de CLIP y DINOv2}
+  \begin{columns}[T]
+    \column{.5\textwidth}
+    \footnotesize
+    \begin{itemize}
+      \item \textbf{CLIP}: capas \alert{superficiales} $\to$ detalle local, mejor REC; profundas $\to$ semántica global.
+      \item \textbf{DINOv2}: las capas profundas ya son finas; las superficiales \alert{no} aportan semántica.
+      \item \textbf{COMM}: todas las capas de CLIP + capas 19–24 de DINOv2, con Linear+LN y pesos aprendidos:
+    \end{itemize}
+    \scriptsize
+    \[
+      \bar{\mathbf{v}}_1=\sum_{i=1}^{24}\alpha_i\,\mathrm{Lin}(\mathrm{LN}(\mathbf{v}_1^i)),\quad
+      \bar{\mathbf{v}}_2=\sum_{j=19}^{24}\beta_j\,\mathrm{Lin}(\mathrm{LN}(\mathbf{v}_2^j))
+    \]
+    \[
+      \hat{\mathbf{v}}=\mathrm{Linear}\big([\,\bar{\mathbf{v}}_1;\ \mathrm{MLP}(\bar{\mathbf{v}}_2)\,]\big)\ \to\ \text{LLM}
+    \]
+    \footnotesize Encoders \alert{congelados}, $336^2$; se entrenan LLM, alineación y fusión.
+    \column{.5\textwidth}
+    \centering\scriptsize
+    \begin{tabular}{lrrrr}
+      \toprule
+      Rama visual & REC & POPE & MME-P & VQAv2 \\
+      \midrule
+      CLIP (capa 23) & 47.3 & 82.3 & 1107.8 & 68.8 \\
+      DINOv2 & 54.8 & 78.3 & 930.5 & 63.1 \\
+      CLIP + MFM & 70.0 & 83.4 & 1164.4 & 69.5 \\
+      DINOv2 + MFM & \textbf{72.8} & 83.3 & 1086.8 & 68.0 \\
+      \textbf{COMM} & \textbf{72.8} & \textbf{83.6} & \textbf{1234.9} & \textbf{70.1} \\
+      \bottomrule
+    \end{tabular}
+
+    \vspace{1mm}
+    {\tiny Promedios en la configuración de análisis (entrenamiento corto).}
+
+    \vspace{2mm}
+    \small RefCOCO val (modelo completo, 7B): \textbf{COMM 91.7} vs. Qwen-VL 89.4 vs. Shikra 87.0.
+
+    \vspace{2mm}
+    \begin{exampleblock}{Idea clave}
+      \small No basta la última capa de CLIP: \alert{combinar niveles} y \alert{combinar encoders} complementarios mejora la percepción fina.
+    \end{exampleblock}
+  \end{columns}
+  \refbox{COMM, §3–§4, Ec.~(1), Tablas 1 y 2}
 \end{frame}
 
 % ============================================================
@@ -713,7 +815,7 @@ loss   = (loss_i + loss_t) / 2
   \end{columns}
   \vspace{3mm}
   \begin{alertblock}{Puente hacia VLMs}
-    \small FasterViT se reporta con preentrenamiento \emph{supervisado} (ImageNet-1K/21K), no con CLIP. Para usarlo en un VLM habría que preentrenarlo imagen–texto, que es justo lo que hace FastVLM con su propio encoder.
+    \small FasterViT se reporta con preentrenamiento \emph{supervisado} (ImageNet-1K/21K). COMM mostró que un encoder supervisado (DeiT) \alert{se alinea mal} con el texto; para usarlo en un VLM habría que preentrenarlo imagen–texto, justo lo que hace FastVLM con su encoder.
   \end{alertblock}
   \refbox{FasterViT, Tablas 1 y 5}
 \end{frame}
@@ -722,41 +824,30 @@ loss   = (loss_i + loss_t) / 2
 \section{FastVLM y FastViTHD}
 % ============================================================
 
-\begin{frame}{Punto de partida: un híbrido CLIP en lugar de ViT}
+\begin{frame}{Punto de partida: un híbrido CLIP y features multiescala}
   \small
   Encoder \textbf{FastViT} (MCi2 de MobileCLIP, 35.7M params, preentrenado con CLIP). LLaVA-1.5 + Vicuna-7B:\\[1mm]
-  \centering
-  \begin{tabular}{lrrr rrrrr r}
+  \centering\footnotesize
+  \begin{tabular}{lrrrrrr}
     \toprule
-    Encoder & Res. & Tokens & Lat. enc. (ms) & GQA & TextVQA & POPE & DocVQA & SeedB. & Avg-5\\
+    Encoder & Res. & Tokens & Lat. enc. (ms) & TextVQA & DocVQA & Avg-5\\
     \midrule
-    ViT-L/14 & 336 & 576 & 127.4 & 62.0 & 58.2 & 85.9 & 28.1 & 66.1 & 60.1\\
-    ViT-L/14$^\dagger$ & 336 & 576 & 127.4 & 63.5 & 59.2 & 86.3 & 28.7 & 68.6 & 61.2\\
-    FastViT & 256 & 64 & 3.0 & 60.2 & 51.6 & 82.9 & 15.8 & 61.5 & 54.4\\
-    FastViT & 768 & 576 & \textbf{34.5} & 62.7 & \textbf{62.3} & 86.5 & \textbf{34.4} & 67.1 & \textbf{62.6}\\
+    ViT-L/14 & 336 & 576 & 127.4 & 58.2 & 28.1 & 60.1\\
+    ViT-L/14$^\dagger$ & 336 & 576 & 127.4 & 59.2 & 28.7 & 61.2\\
+    FastViT & 256 & 64 & 3.0 & 51.6 & 15.8 & 54.4\\
+    FastViT & 768 & 576 & \textbf{34.5} & \textbf{62.3} & \textbf{34.4} & \textbf{62.6}\\
     \bottomrule
   \end{tabular}
   \raggedright
-  \vspace{2mm}
-  \begin{itemize}
-    \item A igual número de tokens (576), FastViT a $768^2$ \alert{supera} a ViT-L/14 a $336^2$ y es $\sim\!4\times$ más rápido.
-    \item La mejora es mayor en tareas \alert{text-rich} (TextVQA, DocVQA): ganar resolución importa.
-    \item A su resolución CLIP nativa (256) no basta: la ventaja está en cómo \alert{escala con la resolución}.
-  \end{itemize}
-  \refbox{FastVLM, Tabla 1 ($^\dagger$ ViT ajustado en la etapa 2)}
-\end{frame}
-
-\begin{frame}{Features multiescala}
-  \begin{columns}[c]
-    \column{.5\textwidth}
-    \small
-    \begin{itemize}
-      \item El VLM suele tomar sólo la \alert{penúltima} capa.
-      \item Las etapas anteriores capturan \alert{otra granularidad}.
-      \item FastVLM agrega features de varias etapas, las reduce a la resolución final y las \alert{concatena por canal} antes del proyector.
+  \vspace{1mm}
+  \begin{columns}[T]
+    \column{.6\textwidth}
+    \begin{itemize}\small
+      \item Con 576 tokens, FastViT a $768^2$ \alert{supera} a ViT-L/14 a $336^2$ y es $\sim\!4\times$ más rápido; la ganancia es mayor en tareas \alert{text-rich}.
+      \item \textbf{Multiescala} (misma intuición que COMM, pero entre \emph{etapas}): features de etapas previas reducidas con DWConv y \alert{concatenadas por canal} antes del proyector.
     \end{itemize}
-    \column{.5\textwidth}
-    \centering\small
+    \column{.4\textwidth}
+    \centering\scriptsize
     \begin{tabular}{llr}
       \toprule
       Multiescala & Pooling & Avg-5 \\
@@ -767,20 +858,10 @@ loss   = (loss_i + loss_t) / 2
       \bottomrule
     \end{tabular}
   \end{columns}
-  \vspace{4mm}
-  \centering
-  \begin{tikzpicture}[node distance=4mm]
-    \node[blk, fill=cConv!30] (a) {Etapa 3};
-    \node[blk, fill=cAtt!30, right=of a] (b) {Etapa 4};
-    \node[blk, fill=cAtt!30, right=of b] (c) {Etapa 5};
-    \node[blk, fill=black!8, right=8mm of c] (cat) {Concat\\\scriptsize canal};
-    \node[blk, fill=cProj!25, right=of cat] (pj) {Proyector};
-    \draw[arr] (a) -- (b); \draw[arr] (b) -- (c); \draw[arr] (c) -- (cat); \draw[arr] (cat) -- (pj);
-    \draw[arr, cGray] (a.south) -- ++(0,-0.45) -| node[pos=0.25,below,font=\scriptsize]{DWConv con stride (aprendido)} (cat.south);
-    \draw[arr, cGray] (b.north) -- ++(0,0.4) -| node[pos=0.25,above,font=\scriptsize]{DWConv con stride} (cat.north);
-  \end{tikzpicture}
-  \refbox{FastVLM, §3.1.1, Tabla 2, Fig.~2}
+  \refbox{FastVLM, Tablas 1–2 y §3.1.1 ($^\dagger$ ViT ajustado en la etapa 2)}
 \end{frame}
+
+
 
 \begin{frame}{FastViTHD: un encoder diseñado para VLMs de alta resolución}
   \centering
@@ -801,8 +882,8 @@ loss   = (loss_i + loss_t) / 2
     \column{.5\textwidth}
     \small
     \begin{itemize}
-      \item \textbf{5 etapas}: RepMixer en 1–3, autoatención multi-cabeza en 4–5.
-      \item Profundidades $[2,12,24,4,2]$; dimensiones $[96,192,384,768,1536]$; ConvFFN con expansión 4.
+      \item \textbf{5 etapas}: RepMixer en 1–3, autoatención multi-cabeza en 4–5. Profundidades $[2,12,24,4,2]$; dims. $[96,\dots,1536]$.
+      \item \textbf{RepMixer} (de FastViT): mezcla de tokens con conv depthwise; en inferencia sus ramas se \alert{reparametrizan} en una sola conv, sin salto residual $\Rightarrow$ menos accesos a memoria.
       \item \alert{125.1M} parámetros, menos que ViT-L/14 (304M) o SigLIP-SO400M (430M).
     \end{itemize}
     \column{.5\textwidth}
@@ -816,33 +897,7 @@ loss   = (loss_i + loss_t) / 2
   \refbox{FastVLM, §3.2 y Fig.~2 (resoluciones calculadas para entrada de $1024^2$)}
 \end{frame}
 
-\begin{frame}{Bloques RepMixer: reparametrización estructural}
-  \begin{columns}[c]
-    \column{.55\textwidth}
-    \small
-    \begin{itemize}
-      \item Heredado de \textbf{FastViT} (Vasu et al., ICCV 2023).
-      \item Mezcla de tokens \alert{convolucional} (depthwise), no atención: costo lineal en píxeles.
-      \item En entrenamiento: ramas con BN y conexión residual.
-      \item En inferencia: las ramas se \alert{fusionan} algebraicamente en una sola convolución depthwise, sin conexiones de salto $\Rightarrow$ menos accesos a memoria y menor latencia.
-    \end{itemize}
-    \column{.45\textwidth}
-    \centering
-    \begin{tikzpicture}[node distance=3mm, scale=.9, every node/.style={transform shape}]
-      \node[font=\scriptsize\bfseries] (t1) {Entrenamiento};
-      \node[blk, fill=cConv!25, below=of t1, minimum width=26mm] (dw) {BN(DWConv($\mathbf{x}$))};
-      \node[circle, draw, below=of dw, inner sep=1pt] (p) {$+$};
-      \draw[arr] (dw) -- (p);
-      \draw[arr] (t1.south) ++(-1.6,-0.3) |- (p.west) node[pos=0.25,left,font=\scriptsize]{$\mathbf{x}$};
-      \node[font=\scriptsize\bfseries, right=22mm of t1] (t2) {Inferencia};
-      \node[blk, fill=cConv!45, below=of t2, minimum width=22mm] (dw2) {DWConv$'$($\mathbf{x}$)};
-      \draw[arr, very thick, cGray] ($(dw.east)+(0.2,-0.4)$) -- ($(dw2.west)+(-0.1,-0.4)$) node[midway,below,font=\scriptsize]{reparam.};
-    \end{tikzpicture}
-  \end{columns}
-  \vspace{3mm}
-  \small \textit{Nota:} el detalle de RepMixer está en el artículo de FastViT, que no es parte de las lecturas; aquí basta la intuición.
-  \refbox{FastVLM, §3.2, Ref.~[82]}
-\end{frame}
+
 
 \begin{frame}{Resolución, tokens y latencia: FastViTHD vs. ConvNeXt}
   \begin{columns}[c]
@@ -964,31 +1019,36 @@ loss   = (loss_i + loss_t) / 2
 \section{Síntesis}
 % ============================================================
 
-\begin{frame}{Comparación de los cuatro trabajos}
+\begin{frame}{Comparación de los trabajos}
   \centering\scriptsize
-  \renewcommand{\arraystretch}{1.25}
-  \begin{tabular}{>{\raggedright\arraybackslash}p{1.9cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{2.6cm} >{\raggedright\arraybackslash}p{3.4cm}}
+  \renewcommand{\arraystretch}{1.2}\setlength{\tabcolsep}{3pt}
+  \resizebox{\textwidth}{!}{%
+  \begin{tabular}{>{\raggedright\arraybackslash}p{1.6cm} >{\raggedright\arraybackslash}p{2.2cm} >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{2.5cm} >{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{2.7cm}}
     \toprule
-    & \textbf{ViT} & \textbf{CLIP} & \textbf{FasterViT} & \textbf{FastVLM / FastViTHD} \\
+    & \textbf{ViT} & \textbf{CLIP} & \textbf{COMM} & \textbf{FasterViT} & \textbf{FastVLM / FastViTHD} \\
     \midrule
-    Aporte & Arquitectura: Transformer sobre parches & Objetivo: contrastivo imagen–texto & Arquitectura híbrida + HAT & Encoder híbrido para VLM + análisis de TTFT \\
-    Tipo & Isotrópico & Doble torre (ResNet/ViT + texto) & Jerárquico, 4 etapas & Jerárquico, 5 etapas \\
-    Mezcla de tokens & Atención global & (según encoder) & Conv $\to$ HAT & RepMixer $\to$ MHSA \\
-    Costo vs. $N$ & $\mathcal{O}(N^2)$ & (según encoder) & $\approx$ lineal & conv lineal; atención a /32 \\
-    Preentren. & Supervisado (JFT, IN-21k) & 400M pares WIT & Supervisado (IN-1k/21k) & CLIP en DataCompDR-1B \\
-    Tokens a $1024^2$ & $\sim$5\,350 ($P{=}14$) & — & — & \textbf{256} \\
-    Rol en VLMs & Columna vertebral & Alineación con lenguaje & Atención eficiente & Encoder ``nativo'' de alta resolución \\
+    Aporte & Transformer sobre parches & Objetivo contrastivo imagen–texto & Qué encoder y qué capa usar; fusión CLIP + DINOv2 & Híbrido + atención jerárquica (HAT) & Encoder híbrido para VLM + análisis de TTFT \\
+    Tipo & Isotrópico & Doble torre (ResNet/ViT + texto) & Dos ViT-L isotrópicos & Jerárquico, 4 etapas & Jerárquico, 5 etapas \\
+    Mezcla de tokens & Atención global & (según encoder) & Atención global & Conv $\to$ HAT & RepMixer $\to$ MHSA \\
+    Costo vs.\ $N$ & $\mathcal{O}(N^2)$ & (según encoder) & $2\times$ ViT, $\mathcal{O}(N^2)$ & $\approx$ lineal & conv lineal; atención a /32 \\
+    Preentren. & Supervisado (JFT, IN-21k) & 400M pares WIT & CLIP + DINOv2 (congelados) & Supervisado (IN-1k/21k) & CLIP en DataCompDR-1B \\
+    Uso de capas & Última ([CLS]) & Embedding final & \alert{Todas las capas}, ponderadas & Última etapa & \alert{Varias etapas} (DWConv) \\
+    Rol en VLMs & Columna vertebral & Alineación con lenguaje & Percepción fina, grounding & Atención eficiente & Alta resolución con pocos tokens \\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
+  \vspace{1mm}
+
+  \scriptsize Marco general (survey): todos estos son encoders de las eras 1–2; en las eras nativas la fusión ocurre antes, pero sigue habiendo un encoder o tokenizador visual.
 \end{frame}
 
 \begin{frame}{Ideas para llevarse}
-  \begin{enumerate}
+  \begin{enumerate}\small
+    \item La arquitectura de los VLMs \alert{evolucionó por eras} (dos torres $\to$ LLM + adaptador $\to$ fusión nativa); el encoder visual sigue presente en todas.
     \item \textbf{ViT} convirtió la imagen en una secuencia de tokens; eso la hace ``digerible'' por un LLM.
     \item \textbf{CLIP} le dio a esos tokens \alert{semántica lingüística} a escala Internet; por eso casi todo VLM parte de un encoder CLIP-like.
+    \item \textbf{COMM}: la supervisión de CLIP es global. Las \alert{capas superficiales} y los encoders autosupervisados (\alert{DINOv2}) aportan detalle fino; combinarlos mejora el grounding.
     \item El cuello de botella actual es la \alert{resolución}: $N_v\propto r^2$ y la atención es cuadrática en $N_v$.
-    \item Los encoders \textbf{jerárquicos / híbridos} (conv temprano, atención tardía) reducen tokens \emph{por diseño}.
-    \item \textbf{FasterViT}: atención global barata con \emph{carrier tokens}.
+    \item Los encoders \textbf{jerárquicos / híbridos} reducen tokens \emph{por diseño}; \textbf{FasterViT} logra atención global barata con \emph{carrier tokens}.
     \item \textbf{FastVLM}: optimizar la \alert{latencia de punta a punta} (TTFT); escalar resolución vale más que podar tokens.
   \end{enumerate}
 \end{frame}
@@ -1001,20 +1061,23 @@ loss   = (loss_i + loss_t) / 2
     \item FastViTHD hace la atención a /32. Si el VLM tiene que leer texto pequeño en un documento, ¿qué riesgo trae un stride de salida de 64? ¿Cómo ayudan los features multiescala?
     \item Escriban el TTFT como función de $r$ para ViT-L/14 y para FastViTHD, suponiendo $T_{\text{prefill}}$ lineal en tokens. ¿A partir de qué $r$ domina el encoder?
     \item ¿Tiene sentido preentrenar FasterViT con CLIP y usarlo en un VLM? ¿Qué cambiaría respecto a FastViTHD?
+    \item COMM muestra que DINOv2, \emph{sin texto}, funciona como rama visual con sólo un MLP, mientras que DeiT supervisado no. ¿Qué dice eso sobre lo que realmente necesita el proyector?
   \end{enumerate}
 \end{frame}
 
-\begin{frame}[allowframebreaks]{Referencias}
+\begin{frame}{Referencias}
   \scriptsize
-  \begin{thebibliography}{99}
-    \bibitem{vit} A.~Dosovitskiy, L.~Beyer, A.~Kolesnikov, D.~Weissenborn, X.~Zhai, T.~Unterthiner, M.~Dehghani, M.~Minderer, G.~Heigold, S.~Gelly, J.~Uszkoreit, N.~Houlsby. \emph{An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale}. ICLR, 2021. arXiv:2010.11929.
-    \bibitem{clip} A.~Radford, J.~W.~Kim, C.~Hallacy, A.~Ramesh, G.~Goh, S.~Agarwal, G.~Sastry, A.~Askell, P.~Mishkin, J.~Clark, G.~Krueger, I.~Sutskever. \emph{Learning Transferable Visual Models From Natural Language Supervision}. ICML, 2021. arXiv:2103.00020.
-    \bibitem{fastervit} A.~Hatamizadeh, G.~Heinrich, H.~Yin, A.~Tao, J.~M.~Alvarez, J.~Kautz, P.~Molchanov. \emph{FasterViT: Fast Vision Transformers with Hierarchical Attention}. ICLR, 2024. arXiv:2306.06189.
-    \bibitem{fastvlm} P.~K.~A.~Vasu, F.~Faghri, C.-L.~Li, C.~Koc, N.~True, A.~Antony, G.~Santhanam, J.~Gabriel, P.~Grasch, O.~Tuzel, H.~Pouransari. \emph{FastVLM: Efficient Vision Encoding for Vision Language Models}. CVPR, 2025. arXiv:2412.13303.
-    \bibitem{fastvit} P.~K.~A.~Vasu, J.~Gabriel, J.~Zhu, O.~Tuzel, A.~Ranjan. \emph{FastViT: A Fast Hybrid Vision Transformer using Structural Reparameterization}. ICCV, 2023. (Citada en FastVLM.)
-    \bibitem{llava0} H.~Liu, C.~Li, Q.~Wu, Y.~J.~Lee. \emph{Visual Instruction Tuning} (LLaVA). NeurIPS, 2023. arXiv:2304.08485.
-    \bibitem{llava} H.~Liu, C.~Li, Y.~Li, Y.~J.~Lee. \emph{Improved Baselines with Visual Instruction Tuning} (LLaVA-1.5). CVPR, 2024. arXiv:2310.03744.
-  \end{thebibliography}
+  \begin{enumerate}\setlength{\itemsep}{1.5pt}
+    \item A.~Dosovitskiy, L.~Beyer, A.~Kolesnikov, D.~Weissenborn, X.~Zhai, T.~Unterthiner, M.~Dehghani, M.~Minderer, G.~Heigold, S.~Gelly, J.~Uszkoreit, N.~Houlsby. \emph{An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale}. ICLR, 2021. arXiv:2010.11929.
+    \item A.~Radford, J.~W.~Kim, C.~Hallacy, A.~Ramesh, G.~Goh, S.~Agarwal, G.~Sastry, A.~Askell, P.~Mishkin, J.~Clark, G.~Krueger, I.~Sutskever. \emph{Learning Transferable Visual Models From Natural Language Supervision}. ICML, 2021. arXiv:2103.00020.
+    \item D.~Jiang, Y.~Liu, S.~Liu, J.~Zhao, H.~Zhang, Z.~Gao, X.~Zhang, J.~Li, H.~Xiong. \emph{From CLIP to DINO: Visual Encoders Shout in Multi-modal Large Language Models}. arXiv:2310.08825, 2023.
+    \item Z.~Li, X.~Wu, H.~Du, F.~Liu, H.~Nghiem, G.~Shi. \emph{Frontier Vision-Language Models: Architectural Evolution, Benchmarks, Applications, and Challenges}. arXiv:2501.02189 (v7), 2026.
+    \item A.~Hatamizadeh, G.~Heinrich, H.~Yin, A.~Tao, J.~M.~Alvarez, J.~Kautz, P.~Molchanov. \emph{FasterViT: Fast Vision Transformers with Hierarchical Attention}. ICLR, 2024. arXiv:2306.06189.
+    \item P.~K.~A.~Vasu, F.~Faghri, C.-L.~Li, C.~Koc, N.~True, A.~Antony, G.~Santhanam, J.~Gabriel, P.~Grasch, O.~Tuzel, H.~Pouransari. \emph{FastVLM: Efficient Vision Encoding for Vision Language Models}. CVPR, 2025. arXiv:2412.13303.
+    \item P.~K.~A.~Vasu, J.~Gabriel, J.~Zhu, O.~Tuzel, A.~Ranjan. \emph{FastViT: A Fast Hybrid Vision Transformer using Structural Reparameterization}. ICCV, 2023. (Citada en FastVLM.)
+    \item H.~Liu, C.~Li, Q.~Wu, Y.~J.~Lee. \emph{Visual Instruction Tuning} (LLaVA). NeurIPS, 2023. arXiv:2304.08485.
+    \item H.~Liu, C.~Li, Y.~Li, Y.~J.~Lee. \emph{Improved Baselines with Visual Instruction Tuning} (LLaVA-1.5). CVPR, 2024. arXiv:2310.03744.
+  \end{enumerate}
 \end{frame}
 
 \end{document}

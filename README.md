@@ -56,7 +56,7 @@ Cada fila enlaza al PDF de la presentación.
 
 **06. Modelos de visión-lenguaje.** Qué es un VLM, su arquitectura y entrenamiento, modelos representativos, evaluación, aplicaciones y riesgos. El listado enlaza la versión en inglés, [`vlms_en`](06_VLMs/vlms_en.pdf).
 
-**07. Codificadores de visión.** El encoder dentro de un VLM tipo LLaVA, Vision Transformer, CLIP y su pérdida contrastiva, el costo de la resolución, FasterViT y FastVLM / FastViTHD.
+**07. Codificadores de visión.** El encoder dentro de un VLM, la evolución por eras de la arquitectura, Vision Transformer, CLIP y su pérdida contrastiva, qué encoder y qué capa usar (COMM: CLIP y DINOv2), el costo de la resolución, FasterViT y FastVLM / FastViTHD.
 
 ---
 
