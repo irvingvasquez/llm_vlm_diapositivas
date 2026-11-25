@@ -2,7 +2,7 @@
 
 Diapositivas del curso **LLMs & VLMs** (modelos de lenguaje y de visión-lenguaje), impartido en el Instituto Politécnico Nacional (ESCOM / CIDETEC).
 
-El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención, la implementación de un GPT, su preentrenamiento y los modelos de visión-lenguaje.
+El curso recorre cómo se construye un modelo de lenguaje: del panorama de la IA generativa al preprocesamiento del texto, los embeddings, el mecanismo de atención, la implementación de un GPT, su preentrenamiento, los modelos de visión-lenguaje y sus codificadores de visión.
 
 | | |
 |---|---|
@@ -22,6 +22,7 @@ llm_vlm_diapositivas/
 ├── 04_LLM/                 # Implementación de un modelo GPT
 ├── 05_Pretraining/         # Preentrenamiento con datos no etiquetados
 ├── 06_VLMs/                # Modelos de visión-lenguaje
+├── 07_vision_encoders/     # Codificadores de visión para VLMs
 └── README.md
 ```
 
@@ -39,6 +40,7 @@ Cada fila enlaza al PDF de la presentación.
 | 04 | Implementación de un modelo GPT | [`04_LLM`](04_LLM) | [PDF](04_LLM/dl_llm.pdf) |
 | 05 | Preentrenamiento con datos no etiquetados | [`05_Pretraining`](05_Pretraining) | [PDF](05_Pretraining/dl_pretraining.pdf) |
 | 06 | Modelos de visión-lenguaje | [`06_VLMs`](06_VLMs) | [vlms_en (English)](06_VLMs/vlms_en.pdf) |
+| 07 | Codificadores de visión para VLMs | [`07_vision_encoders`](07_vision_encoders) | [PDF](07_vision_encoders/codificadores_vision.pdf) |
 
 ### Qué cubre cada lección
 
@@ -53,6 +55,8 @@ Cada fila enlaza al PDF de la presentación.
 **05. Preentrenamiento.** Evaluación de modelos generativos, entropía cruzada y perplejidad, el lazo de entrenamiento con AdamW, sobreajuste, decodificación con temperatura y top-$k$, y cómo guardar pesos o cargar los de GPT-2 de OpenAI.
 
 **06. Modelos de visión-lenguaje.** Qué es un VLM, su arquitectura y entrenamiento, modelos representativos, evaluación, aplicaciones y riesgos. El listado enlaza la versión en inglés, [`vlms_en`](06_VLMs/vlms_en.pdf).
+
+**07. Codificadores de visión.** El encoder dentro de un VLM tipo LLaVA, Vision Transformer, CLIP y su pérdida contrastiva, el costo de la resolución, FasterViT y FastVLM / FastViTHD.
 
 ---
 
